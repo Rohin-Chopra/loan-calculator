@@ -9,7 +9,6 @@ import { ExtraRepaymentSimulator } from './components/ExtraRepaymentSimulator';
 import { LumpSumPayments } from './components/LumpSumPayments';
 import { LoanChart } from './components/LoanChart';
 import { SummaryPanel } from './components/SummaryPanel';
-import { FrequencyComparisonTable } from './components/FrequencyComparisonTable';
 import { useTheme } from './hooks/useTheme';
 
 function getPaymentsPerYear(frequency: string): number {
@@ -181,13 +180,6 @@ function App() {
                 </>
               )}
 
-            {/* Frequency Comparison Table */}
-            <FrequencyComparisonTable
-              principal={loanInput.principal}
-              annualRate={loanInput.annualRate}
-              termYears={loanInput.termYears}
-            />
-
             {/* Chart */}
             <LoanChart
               baseline={baselineCalculation}
@@ -199,6 +191,7 @@ function App() {
                   ? acceleratedCalculation
                   : undefined
               }
+              loanInput={loanInput}
             />
           </>
         )}

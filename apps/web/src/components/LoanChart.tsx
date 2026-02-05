@@ -86,11 +86,33 @@ export function LoanChart({ baseline, accelerated, loanInput }: LoanChartProps) 
     }).format(value);
   };
   
+  const frequencies: FrequencyOption[] = ['fortnightly', 'monthly', 'yearly'];
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-        Loan Balance Over Time
-      </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          Loan Balance Over Time
+        </h2>
+        
+        {/* Frequency Selector Tabs */}
+        <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          {frequencies.map((freq) => (
+            <button
+              key={freq}
+              onClick={() => setSelectedFrequency(freq)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                selectedFrequency === freq
+                  ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              {freq.charAt(0).toUpperCase() + freq.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="h-64 md:h-96">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
@@ -126,22 +148,12 @@ export function LoanChart({ baseline, accelerated, loanInput }: LoanChartProps) 
             <Legend wrapperStyle={{ color: isDark ? '#f3f4f6' : '#111827' }} />
             <Line
               type="monotone"
-              dataKey="baseline"
+              dataKey="balance"
               stroke="#ef4444"
               strokeWidth={2}
               name="Minimum Repayment"
               dot={false}
             />
-            {accelerated && (
-              <Line
-                type="monotone"
-                dataKey="accelerated"
-                stroke="#10b981"
-                strokeWidth={2}
-                name="With Extra Payments"
-                dot={false}
-              />
-            )}
           </LineChart>
         </ResponsiveContainer>
       </div>
