@@ -9,22 +9,23 @@ export function Header({ title, subtitle }: { title?: string; subtitle?: string 
   const displaySubtitle = subtitle || 'See how extra repayments dramatically reduce your interest and loan term';
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 text-white shadow-lg">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+    <header className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-800 dark:via-indigo-800 dark:to-purple-800 text-white shadow-xl border-b border-white/10">
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
+      <div className="relative container mx-auto px-4 py-8 md:py-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-2">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight drop-shadow-lg">
               {displayTitle}
             </h1>
-            <p className="text-blue-100 dark:text-blue-200 text-sm md:text-base">
+            <p className="text-blue-50 dark:text-blue-100 text-base md:text-lg max-w-2xl">
               {displaySubtitle}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {isSavedLoansPage ? (
               <Link
                 to="/"
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105 border border-white/20"
                 aria-label="Back to calculator"
                 title="Back to Calculator"
               >
@@ -35,7 +36,7 @@ export function Header({ title, subtitle }: { title?: string; subtitle?: string 
             ) : (
               <Link
                 to="/saved"
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105 border border-white/20"
                 aria-label="View saved loans"
                 title="Saved Loans"
               >
@@ -46,7 +47,7 @@ export function Header({ title, subtitle }: { title?: string; subtitle?: string 
             )}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              className="p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 hover:scale-105 border border-white/20"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (

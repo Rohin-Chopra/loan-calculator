@@ -233,84 +233,99 @@ export function LoanChart({ loanInput, extraPaymentPerPeriod = 0, lumpSums = [] 
   const frequencies: FrequencyOption[] = ['fortnightly', 'monthly', 'yearly'];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-          Loan Balance Over Time
-        </h2>
-        
-        {/* Frequency Selector Tabs */}
-        <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          {frequencies.map((freq) => (
-            <button
-              key={freq}
-              onClick={() => setSelectedFrequency(freq)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                selectedFrequency === freq
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              {freq.charAt(0).toUpperCase() + freq.slice(1)}
-            </button>
-          ))}
+    <Card className="mb-8 shadow-lg border-2 hover:shadow-xl transition-shadow duration-300">
+      <CardContent className="p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Loan Balance Over Time
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Visualize how your loan balance decreases over time
+            </p>
+          </div>
+          
+          {/* Frequency Selector Tabs */}
+          <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
+            {frequencies.map((freq) => (
+              <button
+                key={freq}
+                onClick={() => setSelectedFrequency(freq)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  selectedFrequency === freq
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                {freq.charAt(0).toUpperCase() + freq.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="h-64 md:h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#374151" : "#e5e7eb"} />
-            <XAxis
-              dataKey="period"
-              label={{
-                value: 'Payment Period',
-                position: 'insideBottom',
-                offset: -5,
-              }}
-              stroke={isDark ? "#9ca3af" : "#6b7280"}
-            />
-            <YAxis
-              label={{
-                value: 'Balance ($)',
-                angle: -90,
-                position: 'insideLeft',
-              }}
-              stroke={isDark ? "#9ca3af" : "#6b7280"}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-            />
-            <Tooltip
-              formatter={(value: number | undefined) => value !== undefined ? formatCurrency(value) : ''}
-              labelFormatter={(label) => `Period ${label}`}
-              contentStyle={{
-                backgroundColor: isDark ? '#1f2937' : '#fff',
-                border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
-                borderRadius: '8px',
-                color: isDark ? '#f3f4f6' : '#111827',
-              }}
-            />
-            <Legend wrapperStyle={{ color: isDark ? '#f3f4f6' : '#111827' }} />
-            <Line
-              type="monotone"
-              dataKey="baseline"
-              stroke="#ef4444"
-              strokeWidth={2}
-              name="Minimum Repayment"
-              dot={false}
-            />
-            {hasExtraPayments && acceleratedSchedule && (
+        <div className="h-64 md:h-96 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#374151" : "#e5e7eb"} opacity={0.3} />
+              <XAxis
+                dataKey="period"
+                label={{
+                  value: 'Payment Period',
+                  position: 'insideBottom',
+                  offset: -5,
+                }}
+                stroke={isDark ? "#9ca3af" : "#6b7280"}
+                tick={{ fill: isDark ? "#9ca3af" : "#6b7280" }}
+              />
+              <YAxis
+                label={{
+                  value: 'Balance ($)',
+                  angle: -90,
+                  position: 'insideLeft',
+                }}
+                stroke={isDark ? "#9ca3af" : "#6b7280"}
+                tick={{ fill: isDark ? "#9ca3af" : "#6b7280" }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip
+                formatter={(value: number | undefined) => value !== undefined ? formatCurrency(value) : ''}
+                labelFormatter={(label) => `Period ${label}`}
+                contentStyle={{
+                  backgroundColor: isDark ? '#1f2937' : '#fff',
+                  border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  color: isDark ? '#f3f4f6' : '#111827',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                }}
+              />
+              <Legend 
+                wrapperStyle={{ color: isDark ? '#f3f4f6' : '#111827' }}
+                iconType="line"
+              />
               <Line
                 type="monotone"
-                dataKey="accelerated"
-                stroke="#10b981"
-                strokeWidth={2}
-                name="With Extra Payments"
+                dataKey="baseline"
+                stroke="#ef4444"
+                strokeWidth={3}
+                name="Minimum Repayment"
                 dot={false}
+                activeDot={{ r: 6 }}
               />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+              {hasExtraPayments && acceleratedSchedule && (
+                <Line
+                  type="monotone"
+                  dataKey="accelerated"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  name="With Extra Payments"
+                  dot={false}
+                  activeDot={{ r: 6 }}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

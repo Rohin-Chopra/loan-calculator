@@ -69,75 +69,93 @@ export function LoanInputForm({ onSubmit, initialValue }: LoanInputProps) {
   };
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>Loan Details</CardTitle>
+    <Card className="mb-8 shadow-lg border-2 hover:shadow-xl transition-shadow duration-300">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+          Loan Details
+        </CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Enter your loan information to get started
+        </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="principal">Loan Amount ($)</Label>
-            <Input
-              id="principal"
-              type="number"
-              step="1000"
-              value={principal}
-              onChange={(e) => setPrincipal(e.target.value)}
-              className={errors.principal ? 'border-destructive' : ''}
-              placeholder="52000"
-            />
-            {errors.principal && (
-              <p className="text-sm text-destructive">{errors.principal}</p>
-            )}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="principal" className="text-base font-semibold">
+                Loan Amount ($)
+              </Label>
+              <Input
+                id="principal"
+                type="number"
+                step="1000"
+                value={principal}
+                onChange={(e) => setPrincipal(e.target.value)}
+                className={`h-12 text-lg ${errors.principal ? 'border-destructive' : ''}`}
+                placeholder="52,000"
+              />
+              {errors.principal && (
+                <p className="text-sm text-destructive font-medium">{errors.principal}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="annualRate" className="text-base font-semibold">
+                Interest Rate (% per year)
+              </Label>
+              <Input
+                id="annualRate"
+                type="number"
+                step="0.1"
+                value={annualRate}
+                onChange={(e) => setAnnualRate(e.target.value)}
+                className={`h-12 text-lg ${errors.annualRate ? 'border-destructive' : ''}`}
+                placeholder="9.5"
+              />
+              {errors.annualRate && (
+                <p className="text-sm text-destructive font-medium">{errors.annualRate}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="termYears" className="text-base font-semibold">
+                Loan Term (years)
+              </Label>
+              <Input
+                id="termYears"
+                type="number"
+                step="0.5"
+                value={termYears}
+                onChange={(e) => setTermYears(e.target.value)}
+                className={`h-12 text-lg ${errors.termYears ? 'border-destructive' : ''}`}
+                placeholder="7"
+              />
+              {errors.termYears && (
+                <p className="text-sm text-destructive font-medium">{errors.termYears}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="frequency" className="text-base font-semibold">
+                Repayment Frequency
+              </Label>
+              <Select value={frequency} onValueChange={(value) => setFrequency(value as RepaymentFrequency)}>
+                <SelectTrigger id="frequency" className="h-12 text-lg">
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="fortnightly">Fortnightly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="annualRate">Interest Rate (% per year)</Label>
-            <Input
-              id="annualRate"
-              type="number"
-              step="0.1"
-              value={annualRate}
-              onChange={(e) => setAnnualRate(e.target.value)}
-              className={errors.annualRate ? 'border-destructive' : ''}
-              placeholder="9.5"
-            />
-            {errors.annualRate && (
-              <p className="text-sm text-destructive">{errors.annualRate}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="termYears">Loan Term (years)</Label>
-            <Input
-              id="termYears"
-              type="number"
-              step="0.5"
-              value={termYears}
-              onChange={(e) => setTermYears(e.target.value)}
-              className={errors.termYears ? 'border-destructive' : ''}
-              placeholder="7"
-            />
-            {errors.termYears && (
-              <p className="text-sm text-destructive">{errors.termYears}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="frequency">Repayment Frequency</Label>
-            <Select value={frequency} onValueChange={(value) => setFrequency(value as RepaymentFrequency)}>
-              <SelectTrigger id="frequency">
-                <SelectValue placeholder="Select frequency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="fortnightly">Fortnightly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button type="submit" className="w-full">
+          <Button 
+            type="submit" 
+            className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
             Calculate Loan
           </Button>
         </form>

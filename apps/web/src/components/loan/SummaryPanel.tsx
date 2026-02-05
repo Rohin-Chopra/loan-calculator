@@ -51,65 +51,90 @@ export function SummaryPanel({
   };
 
   return (
-    <Card className="mb-6 bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/30 dark:to-blue-900/30 border-2 border-green-200 dark:border-green-800">
-      <CardHeader>
-        <CardTitle>🎉 Your Savings Summary</CardTitle>
+    <Card className="mb-8 shadow-xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/40 dark:via-green-950/40 dark:to-teal-950/40">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold flex items-center gap-2">
+          <span className="text-3xl">🎉</span>
+          <span className="bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400 bg-clip-text text-transparent">
+            Your Savings Summary
+          </span>
+        </CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          See how much you're saving with extra payments
+        </p>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Interest Saved</p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="border-2 border-emerald-200 dark:border-emerald-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Interest Saved</p>
+              </div>
+              <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
                 {formatCurrency(interestSaved)}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                That's money back in your pocket!
+              <p className="text-xs text-muted-foreground font-medium">
+                💰 That's money back in your pocket!
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground mb-1">Time Saved</p>
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+          <Card className="border-2 border-blue-200 dark:border-blue-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Time Saved</p>
+              </div>
+              <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                 {formatTime(timeSavedMonths)}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                You finish {timeSavedYears > 1 ? `${timeSavedYears.toFixed(1)} years` : `${timeSavedMonths} months`} earlier
+              <p className="text-xs text-muted-foreground font-medium">
+                ⏰ You finish {timeSavedYears > 1 ? `${timeSavedYears.toFixed(1)} years` : `${timeSavedMonths} months`} earlier
               </p>
             </CardContent>
           </Card>
 
           {equivalentReturn > 0 && (
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-1">
-                  Equivalent Risk-Free Return
-                </p>
-                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+            <Card className="border-2 border-purple-200 dark:border-purple-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Equivalent Risk-Free Return
+                  </p>
+                </div>
+                <p className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                   {equivalentReturn.toFixed(1)}%
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This is like earning {equivalentReturn.toFixed(1)}% risk-free on
-                  your extra payments
+                <p className="text-xs text-muted-foreground font-medium">
+                  📈 Like earning {equivalentReturn.toFixed(1)}% risk-free on your extra payments
                 </p>
               </CardContent>
             </Card>
           )}
 
-          <Card className="border-l-4 border-l-primary">
-            <CardContent className="p-4">
-              <p className="text-sm font-medium mb-2">
-                Total Extra Payments Made
-              </p>
-              <p className="text-xl font-semibold">
-                {formatCurrency(totalExtraPayments)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                You saved {formatCurrency(interestSaved)} by paying{' '}
-                {formatCurrency(totalExtraPayments)} extra
-              </p>
+          <Card className="border-2 border-indigo-200 dark:border-indigo-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-lg md:col-span-2">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                    <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                      Total Extra Payments Made
+                    </p>
+                  </div>
+                  <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+                    {formatCurrency(totalExtraPayments)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground font-medium">
+                    You saved <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(interestSaved)}</span> by paying{' '}
+                    <span className="font-bold">{formatCurrency(totalExtraPayments)}</span> extra
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

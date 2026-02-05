@@ -49,10 +49,10 @@ export default function Calculator() {
       {loanInput && baselineCalculation && (
         <>
           {/* Save Button */}
-          <div className="mb-4 flex justify-end">
+          <div className="mb-6 flex justify-end">
             <Button
               onClick={() => setShowSaveModal(true)}
-              className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600"
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -101,12 +101,17 @@ export default function Calculator() {
 
       {/* Empty State */}
       {!loanInput && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-lg mb-4">
+        <Card className="shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+          <CardContent className="p-16 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
+              <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
               Enter your loan details above to get started
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
               See how small changes in repayment behavior can save you thousands
               in interest
             </p>
