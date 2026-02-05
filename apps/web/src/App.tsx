@@ -124,6 +124,7 @@ function App() {
             </button>
           </div>
         </div>
+        </div>
       </header>
 
       {/* Main Content */}
