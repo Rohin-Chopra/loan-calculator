@@ -52,9 +52,13 @@ export function useLoanCalculator() {
 
   const handleLoanSubmit = (input: LoanInput) => {
     setLoanInput(input);
-    setExtraPaymentPerPeriod(0);
-    setLumpSums([]);
-    setCurrentLoanId(null); // Clear current loan ID when submitting new loan
+    // Only reset extra payments and lump sums if this is a new loan
+    // If currentLoanId is set, we're editing an existing loan, so preserve those values
+    if (!currentLoanId) {
+      setExtraPaymentPerPeriod(0);
+      setLumpSums([]);
+    }
+    // Don't clear currentLoanId here - it should only be cleared when explicitly creating a new loan
   };
 
   const paymentsPerYear = loanInput
@@ -66,6 +70,13 @@ export function useLoanCalculator() {
     acceleratedCalculation &&
     hasAcceleratedPayments &&
     acceleratedCalculation.schedule.length < (baselineCalculation?.schedule.length ?? Infinity);
+
+  const clearCurrentLoan = () => {
+    setCurrentLoanId(null);
+    setLoanInput(null);
+    setExtraPaymentPerPeriod(0);
+    setLumpSums([]);
+  };
 
   return {
     loanInput,
@@ -79,5 +90,7 @@ export function useLoanCalculator() {
     handleLoanSubmit,
     setExtraPaymentPerPeriod,
     setLumpSums,
+    setCurrentLoanId,
+    clearCurrentLoan,
   };
 }

@@ -28,6 +28,7 @@ export default function Calculator() {
     handleLoanSubmit,
     setExtraPaymentPerPeriod,
     setLumpSums,
+    setCurrentLoanId,
   } = useLoanCalculator();
 
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -77,7 +78,8 @@ export default function Calculator() {
       }
     } else {
       // Create new loan
-      saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
+      const newLoan = saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
+      setCurrentLoanId(newLoan.id); // Set the current loan ID so future updates work
       setShowSaveModal(false);
       setSaveName('');
       alert('Loan saved successfully!');
