@@ -1,73 +1,82 @@
-# React + TypeScript + Vite
+# 💰 Kill My Loan
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A mobile-first loan calculator web app that helps Australians understand the true cost of their loans and see how extra repayments dramatically reduce interest and loan duration.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Loan Input Module**: Enter loan amount, interest rate, term, and repayment frequency (weekly, fortnightly, monthly)
+- **Repayment Calculator**: See minimum payment, total interest, and loan end date
+- **Extra Repayment Simulator**: Interactive slider to see how extra repayments affect your loan
+- **Lump Sum Payments**: Add one-time payments at specific periods
+- **Visualization**: Charts showing loan balance over time (baseline vs accelerated)
+- **Summary Panel**: See interest saved, time saved, and equivalent risk-free return
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Vite** - Build tool and dev server
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Recharts** - Data visualization
+- **pnpm** - Package manager
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+ 
+- pnpm (install with `npm install -g pnpm`)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Install dependencies
+pnpm install
+
+# Start dev server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Preview production build
+pnpm preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/          # React components
+│   ├── LoanInput.tsx
+│   ├── RepaymentResults.tsx
+│   ├── ExtraRepaymentSimulator.tsx
+│   ├── LumpSumPayments.tsx
+│   ├── LoanChart.tsx
+│   └── SummaryPanel.tsx
+├── utils/               # Calculation utilities
+│   └── loanCalculator.ts
+├── types.ts             # TypeScript type definitions
+├── App.tsx              # Main app component
+└── main.tsx             # Entry point
+```
+
+## Calculation Logic
+
+The app uses standard amortization formulas:
+
+- **Minimum Payment**: `P * (r) / (1 - (1 + r)^(-n))`
+  - Where P = principal, r = periodic rate, n = total payments
+- **Extra Repayments**: Applied directly to principal, recalculating remaining term
+- **Lump Sums**: Reduce principal at specified periods, recalculating from that point
+
+## Test Scenarios
+
+From the PRD:
+- $52k @ 9.5%, 7 years, fortnightly
+- Extra $100/fortnight reduces term correctly
+- Lump sum applied mid-term recalculates correctly
+
+## License
+
+MIT
