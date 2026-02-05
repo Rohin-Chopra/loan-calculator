@@ -35,3 +35,13 @@ export interface LoanResult {
   timeSavedMonths?: number;
   equivalentReturn?: number;
 }
+
+export interface SavedLoan {
+  id: string;
+  name: string;
+  loanInput: LoanInput;
+  extraPaymentPerPeriod: number;
+  lumpSums: LumpSumPayment[];
+  createdAt: string;
+  updatedAt: string;
+}
