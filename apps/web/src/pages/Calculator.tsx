@@ -121,13 +121,15 @@ export default function Calculator() {
 
       {/* Save Modal */}
       <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Save Loan</DialogTitle>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
+              Save Loan
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="saveName">Loan Name (optional)</Label>
+          <div className="space-y-6 py-4">
+            <div className="space-y-3">
+              <Label htmlFor="saveName" className="text-base font-semibold">Loan Name (optional)</Label>
               <Input
                 id="saveName"
                 type="text"
@@ -135,15 +137,16 @@ export default function Calculator() {
                 onChange={(e) => setSaveName(e.target.value)}
                 placeholder="e.g., Car Loan 2024"
                 autoFocus
+                className="h-12 text-lg"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground font-medium">
                 Leave blank to auto-generate a name
               </p>
             </div>
             <div className="flex gap-3">
               <Button
                 onClick={handleSaveLoan}
-                className="flex-1"
+                className="flex-1 h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 Save
               </Button>
@@ -153,7 +156,7 @@ export default function Calculator() {
                   setShowSaveModal(false);
                   setSaveName('');
                 }}
-                className="flex-1"
+                className="flex-1 h-11"
               >
                 Cancel
               </Button>
