@@ -57,18 +57,20 @@ export default function SavedLoans() {
     <MainLayout headerTitle="💰 Kill My Loan" headerSubtitle="Your saved loan calculations">
       <div className="max-w-4xl mx-auto">
         {savedLoans.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-lg mb-4">
+          <Card className="shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            <CardContent className="p-16 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
+                <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
                 No saved loans yet
               </p>
-              <p className="text-sm text-muted-foreground mb-6">
+              <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto">
                 Save your loan calculations to access them later
               </p>
-              <Button asChild>
+              <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-8">
                 <Link to="/">
                   Go to Calculator
                 </Link>
@@ -76,54 +78,56 @@ export default function SavedLoans() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {savedLoans.map((loan) => (
-              <Card key={loan.id} className="hover:shadow-xl transition-shadow">
-                <CardHeader>
-                  <CardTitle>{loan.name}</CardTitle>
+              <Card key={loan.id} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                    {loan.name}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                    <div>
-                      <span className="text-muted-foreground">Principal:</span>
-                      <p className="font-semibold">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Principal</p>
+                      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
                         {formatCurrency(loan.loanInput.principal)}
                       </p>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Rate:</span>
-                      <p className="font-semibold">
+                    <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-200 dark:border-purple-800">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Rate</p>
+                      <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
                         {(loan.loanInput.annualRate * 100).toFixed(2)}%
                       </p>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Term:</span>
-                      <p className="font-semibold">
+                    <div className="p-4 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Term</p>
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
                         {loan.loanInput.termYears} years
                       </p>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Frequency:</span>
-                      <p className="font-semibold capitalize">
+                    <div className="p-4 rounded-lg bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200 dark:border-orange-800">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Frequency</p>
+                      <p className="text-lg font-bold text-orange-600 dark:text-orange-400 capitalize">
                         {loan.loanInput.frequency}
                       </p>
                     </div>
                   </div>
                   {(loan.extraPaymentPerPeriod > 0 || loan.lumpSums.length > 0) && (
-                    <div className="mt-3 pt-3 border-t">
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex flex-wrap gap-4 text-sm">
                         {loan.extraPaymentPerPeriod > 0 && (
-                          <div>
-                            <span className="text-muted-foreground">Extra per period:</span>
-                            <span className="ml-2 font-semibold text-green-600 dark:text-green-400">
+                          <div className="px-3 py-2 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
+                            <span className="text-muted-foreground font-medium">Extra per period:</span>
+                            <span className="ml-2 font-bold text-green-600 dark:text-green-400">
                               {formatCurrency(loan.extraPaymentPerPeriod)}
                             </span>
                           </div>
                         )}
                         {loan.lumpSums.length > 0 && (
-                          <div>
-                            <span className="text-muted-foreground">Lump sums:</span>
-                            <span className="ml-2 font-semibold text-green-600 dark:text-green-400">
+                          <div className="px-3 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800">
+                            <span className="text-muted-foreground font-medium">Lump sums:</span>
+                            <span className="ml-2 font-bold text-purple-600 dark:text-purple-400">
                               {loan.lumpSums.length} payment{loan.lumpSums.length > 1 ? 's' : ''}
                             </span>
                           </div>
@@ -131,16 +135,16 @@ export default function SavedLoans() {
                       </div>
                     </div>
                   )}
-                  <div className="mt-3 text-xs text-muted-foreground">
+                  <div className="mt-4 text-xs text-muted-foreground font-medium">
                     Saved {formatDate(loan.createdAt)}
                     {loan.updatedAt !== loan.createdAt && (
                       <span> • Updated {formatDate(loan.updatedAt)}</span>
                     )}
                   </div>
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-3 mt-6">
                     <Button
                       onClick={() => handleLoad(loan)}
-                      className="flex-1"
+                      className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       Load Loan
                     </Button>
@@ -150,6 +154,7 @@ export default function SavedLoans() {
                       disabled={deletingId === loan.id}
                       size="icon"
                       aria-label="Delete loan"
+                      className="h-11 w-11"
                     >
                       {deletingId === loan.id ? (
                         <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
