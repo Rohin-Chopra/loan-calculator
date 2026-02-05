@@ -13,6 +13,7 @@ A mobile-first loan calculator web app that helps Australians understand the tru
 
 ## Tech Stack
 
+- **Turbo** - Monorepo build system
 - **Vite** - Build tool and dev server
 - **React 19** - UI framework
 - **TypeScript** - Type safety
@@ -45,20 +46,24 @@ pnpm preview
 
 ## Project Structure
 
+This is a monorepo managed by Turbo:
+
 ```
-src/
-├── components/          # React components
-│   ├── LoanInput.tsx
-│   ├── RepaymentResults.tsx
-│   ├── ExtraRepaymentSimulator.tsx
-│   ├── LumpSumPayments.tsx
-│   ├── LoanChart.tsx
-│   └── SummaryPanel.tsx
-├── utils/               # Calculation utilities
-│   └── loanCalculator.ts
-├── types.ts             # TypeScript type definitions
-├── App.tsx              # Main app component
-└── main.tsx             # Entry point
+loan-calculator/
+├── apps/
+│   └── web/              # Main web application
+│       ├── src/
+│       │   ├── components/    # React components
+│       │   ├── utils/          # Calculation utilities
+│       │   ├── hooks/          # React hooks
+│       │   ├── types.ts        # TypeScript definitions
+│       │   ├── App.tsx         # Main app component
+│       │   └── main.tsx        # Entry point
+│       └── package.json
+├── packages/             # Shared packages (future)
+├── turbo.json            # Turbo configuration
+├── pnpm-workspace.yaml   # pnpm workspace config
+└── package.json          # Root package.json
 ```
 
 ## Calculation Logic
