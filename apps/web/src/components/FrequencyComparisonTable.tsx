@@ -16,7 +16,7 @@ export function FrequencyComparisonTable({
   termYears,
 }: FrequencyComparisonTableProps) {
 
-  const frequencies: FrequencyOption[] = ['weekly', 'fortnightly', 'monthly', 'yearly'];
+  const frequencies: FrequencyOption[] = ['fortnightly', 'monthly', 'yearly'];
 
   const comparisons = useMemo(() => {
     return frequencies.map((frequency) => {
@@ -104,11 +104,11 @@ export function FrequencyComparisonTable({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 overflow-x-auto">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+      <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">
         Frequency Comparison
       </h2>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Compare how different repayment frequencies affect your loan
+        Compare fortnightly, monthly, and yearly repayment options
       </p>
       
       <div className="overflow-x-auto">
@@ -179,7 +179,7 @@ export function FrequencyComparisonTable({
       
       <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>💡 Tip:</strong> More frequent payments (weekly/fortnightly) reduce total interest 
+          <strong>💡 Tip:</strong> More frequent payments (fortnightly) reduce total interest 
           because you pay down principal faster, reducing the interest charged on the remaining balance.
         </p>
       </div>
