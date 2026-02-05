@@ -46,9 +46,18 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
         setLumpSums(savedLoan.lumpSums);
         setCurrentLoanId(savedLoan.id);
         sessionStorage.removeItem('loadLoan');
+        return; // Don't clear state if we loaded from sessionStorage
       } catch (e) {
         console.error('Failed to load saved loan:', e);
       }
+    }
+
+    // Priority 3: Clear state when navigating to home page (no loan ID and no sessionStorage data)
+    if (!loanIdFromUrl && !loadLoanData) {
+      setLoanInput(null);
+      setExtraPaymentPerPeriod(0);
+      setLumpSums([]);
+      setCurrentLoanId(null);
     }
   }, [loanIdFromUrl]);
 
