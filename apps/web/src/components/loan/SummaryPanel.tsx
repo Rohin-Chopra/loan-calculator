@@ -57,6 +57,14 @@ export function SummaryPanel({
     return `${years} year${years !== 1 ? 's' : ''} and ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''}`;
   };
 
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-AU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date);
+  };
+
   return (
     <Card className="mb-8 shadow-xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/40 dark:via-green-950/40 dark:to-teal-950/40">
       <CardHeader className="pb-4">
@@ -111,8 +119,11 @@ export function SummaryPanel({
               <p className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">
                 {formatTime(payoffDurationMonths)}
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-xs text-muted-foreground font-medium mb-1">
                 📅 Your loan will be paid off in {formatTime(payoffDurationMonths)}
+              </p>
+              <p className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+                End date: {formatDate(accelerated.loanEndDate)}
               </p>
             </CardContent>
           </Card>
