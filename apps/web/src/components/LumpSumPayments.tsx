@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { LumpSumPayment } from '../types';
 
 interface LumpSumPaymentsProps {
   onLumpSumsChange: (lumpSums: LumpSumPayment[]) => void;
   paymentsPerYear: number;
+  initialLumpSums?: LumpSumPayment[];
 }
 
 export function LumpSumPayments({
   onLumpSumsChange,
   paymentsPerYear,
+  initialLumpSums,
 }: LumpSumPaymentsProps) {
-  const [lumpSums, setLumpSums] = useState<LumpSumPayment[]>([]);
+  const [lumpSums, setLumpSums] = useState<LumpSumPayment[]>(initialLumpSums || []);
+
+  // Update lump sums when initialLumpSums changes
+  useEffect(() => {
+    if (initialLumpSums !== undefined) {
+      setLumpSums(initialLumpSums);
+    }
+  }, [initialLumpSums]);
 
   const addLumpSum = () => {
     setLumpSums([...lumpSums, { amount: 0, period: 0 }]);

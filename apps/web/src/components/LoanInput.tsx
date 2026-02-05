@@ -1,16 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { LoanInput, RepaymentFrequency } from '../types';
 
 interface LoanInputProps {
   onSubmit: (input: LoanInput) => void;
+  initialValue?: LoanInput;
 }
 
-export function LoanInputForm({ onSubmit }: LoanInputProps) {
-  const [principal, setPrincipal] = useState<string>('52000');
-  const [annualRate, setAnnualRate] = useState<string>('9.5');
-  const [termYears, setTermYears] = useState<string>('7');
-  const [frequency, setFrequency] = useState<RepaymentFrequency>('fortnightly');
+export function LoanInputForm({ onSubmit, initialValue }: LoanInputProps) {
+  const [principal, setPrincipal] = useState<string>(initialValue?.principal.toString() || '52000');
+  const [annualRate, setAnnualRate] = useState<string>(initialValue ? (initialValue.annualRate * 100).toString() : '9.5');
+  const [termYears, setTermYears] = useState<string>(initialValue?.termYears.toString() || '7');
+  const [frequency, setFrequency] = useState<RepaymentFrequency>(initialValue?.frequency || 'fortnightly');
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Update form when initialValue changes
+  useEffect(() => {
+    if (initialValue) {
+      setPrincipal(initialValue.principal.toString());
+      setAnnualRate((initialValue.annualRate * 100).toString());
+      setTermYears(initialValue.termYears.toString());
+      setFrequency(initialValue.frequency);
+    }
+  }, [initialValue]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};

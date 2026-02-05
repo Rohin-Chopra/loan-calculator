@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -24,24 +24,44 @@ interface LoanChartProps {
 export function LoanChart({ loanInput, extraPaymentPerPeriod = 0, lumpSums = [] }: LoanChartProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [selectedFrequency, setSelectedFrequency] = useState<FrequencyOption>('monthly');
+  
+  // Initialize frequency based on loan input, mapping weekly to fortnightly
+  const getInitialFrequency = (freq: string): FrequencyOption => {
+    if (freq === 'weekly' || freq === 'fortnightly') {
+      return 'fortnightly';
+    }
+    if (freq === 'monthly') {
+      return 'monthly';
+    }
+    return 'monthly'; // default fallback
+  };
+  
+  const [selectedFrequency, setSelectedFrequency] = useState<FrequencyOption>(() => 
+    getInitialFrequency(loanInput.frequency)
+  );
+  
+  // Update frequency when loanInput changes (e.g., when loading a saved loan)
+  useEffect(() => {
+    const newFreq = getInitialFrequency(loanInput.frequency);
+    setSelectedFrequency(newFreq);
+  }, [loanInput.frequency]);
 
   const hasExtraPayments = extraPaymentPerPeriod > 0 || lumpSums.length > 0;
+
+  // Helper function to get payments per year for a frequency
+  const getPaymentsPerYear = (freq: string): number => {
+    switch (freq) {
+      case 'weekly': return 52;
+      case 'fortnightly': return 26;
+      case 'monthly': return 12;
+      case 'yearly': return 1;
+      default: return 12;
+    }
+  };
 
   // Helper function to convert extra payment to selected frequency
   const convertExtraPayment = (originalFreq: string, targetFreq: FrequencyOption, extraPayment: number): number => {
     if (originalFreq === targetFreq) return extraPayment;
-    
-    // Get payments per year for each frequency
-    const getPaymentsPerYear = (freq: string): number => {
-      switch (freq) {
-        case 'weekly': return 52;
-        case 'fortnightly': return 26;
-        case 'monthly': return 12;
-        case 'yearly': return 1;
-        default: return 12;
-      }
-    };
     
     const originalPaymentsPerYear = getPaymentsPerYear(originalFreq);
     const targetPaymentsPerYear = getPaymentsPerYear(targetFreq);
@@ -49,6 +69,20 @@ export function LoanChart({ loanInput, extraPaymentPerPeriod = 0, lumpSums = [] 
     // Convert: extra payment per period * periods per year = total extra per year
     // Then divide by target periods per year
     return (extraPayment * originalPaymentsPerYear) / targetPaymentsPerYear;
+  };
+
+  // Helper function to convert lump sum periods to target frequency
+  const convertLumpSums = (originalFreq: string, targetFreq: FrequencyOption, lumpSums: LumpSumPayment[]): LumpSumPayment[] => {
+    if (originalFreq === targetFreq) return lumpSums;
+    
+    const originalPaymentsPerYear = getPaymentsPerYear(originalFreq);
+    const targetPaymentsPerYear = getPaymentsPerYear(targetFreq);
+    const conversionRatio = targetPaymentsPerYear / originalPaymentsPerYear;
+    
+    return lumpSums.map(ls => ({
+      ...ls,
+      period: Math.floor(ls.period * conversionRatio),
+    }));
   };
 
   // Calculate baseline schedule for selected frequency
@@ -111,11 +145,14 @@ export function LoanChart({ loanInput, extraPaymentPerPeriod = 0, lumpSums = [] 
       // Convert extra payment to yearly equivalent
       const yearlyExtraPayment = convertExtraPayment(loanInput.frequency, 'yearly', extraPaymentPerPeriod);
       
+      // Convert lump sums to yearly periods
+      const convertedLumpSums = convertLumpSums(loanInput.frequency, 'yearly', lumpSums);
+      
       // Calculate schedule with extra payments
       const schedule: Array<{ period: number; balance: number }> = [];
       let balance = loanInput.principal;
       let period = 0;
-      const lumpSumMap = new Map(lumpSums.map(ls => [ls.period, ls.amount]));
+      const lumpSumMap = new Map(convertedLumpSums.map(ls => [ls.period, ls.amount]));
       
       while (balance > 0.01 && period < totalPayments) {
         // Apply lump sum if applicable
@@ -142,7 +179,11 @@ export function LoanChart({ loanInput, extraPaymentPerPeriod = 0, lumpSums = [] 
       frequency: selectedFrequency,
     };
     
-    const calculation = calculateLoanSchedule(frequencyLoanInput, extraPaymentPerPeriod, lumpSums);
+    // Convert extra payment and lump sums to selected frequency
+    const convertedExtraPayment = convertExtraPayment(loanInput.frequency, selectedFrequency, extraPaymentPerPeriod);
+    const convertedLumpSums = convertLumpSums(loanInput.frequency, selectedFrequency, lumpSums);
+    
+    const calculation = calculateLoanSchedule(frequencyLoanInput, convertedExtraPayment, convertedLumpSums);
     return calculation.schedule.map(item => ({
       period: item.period,
       balance: item.balance,

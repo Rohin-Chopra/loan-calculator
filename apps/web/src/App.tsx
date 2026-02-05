@@ -129,7 +129,7 @@ function App() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Loan Input Section */}
-        <LoanInputForm onSubmit={handleLoanSubmit} />
+        <LoanInputForm onSubmit={handleLoanSubmit} initialValue={loanInput || undefined} />
 
         {/* Results Section */}
         {loanInput && baselineCalculation && (
@@ -163,6 +163,7 @@ function App() {
               <LumpSumPayments
                 onLumpSumsChange={setLumpSums}
                 paymentsPerYear={paymentsPerYear}
+                initialLumpSums={loanInput ? lumpSums : undefined}
               />
             </div>
 
