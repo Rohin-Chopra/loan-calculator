@@ -122,7 +122,6 @@ function App() {
                     baseline={baselineCalculation}
                     accelerated={acceleratedCalculation}
                     extraPaymentPerPeriod={extraPaymentPerPeriod}
-                    paymentsPerYear={paymentsPerYear}
                   />
                 </>
               )}

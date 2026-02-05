@@ -5,14 +5,12 @@ interface SummaryPanelProps {
   baseline: LoanCalculation;
   accelerated: LoanCalculation;
   extraPaymentPerPeriod: number;
-  paymentsPerYear: number;
 }
 
 export function SummaryPanel({
   baseline,
   accelerated,
   extraPaymentPerPeriod,
-  paymentsPerYear,
 }: SummaryPanelProps) {
   const interestSaved = baseline.totalInterest - accelerated.totalInterest;
   const timeSavedMonths =
