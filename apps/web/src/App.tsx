@@ -10,6 +10,11 @@ import { LumpSumPayments } from './components/LumpSumPayments';
 import { LoanChart } from './components/LoanChart';
 import { SummaryPanel } from './components/SummaryPanel';
 import { useTheme } from './hooks/useTheme';
+import { Button } from './components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
+import { Input } from './components/ui/input';
+import { Label } from './components/ui/label';
+import { Card, CardContent } from './components/ui/card';
 
 function getPaymentsPerYear(frequency: string): number {
   switch (frequency) {
@@ -136,15 +141,15 @@ function App() {
           <>
             {/* Save Button */}
             <div className="mb-4 flex justify-end">
-              <button
+              <Button
                 onClick={() => setShowSaveModal(true)}
-                className="flex items-center gap-2 bg-green-600 dark:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
+                className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                 </svg>
                 Save Loan
-              </button>
+              </Button>
             </div>
 
             <RepaymentResults
@@ -192,65 +197,62 @@ function App() {
 
         {/* Empty State */}
         {!loanInput && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-12 text-center">
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
-              Enter your loan details above to get started
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              See how small changes in repayment behavior can save you thousands
-              in interest
-            </p>
-          </div>
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-lg mb-4">
+                Enter your loan details above to get started
+              </p>
+              <p className="text-sm text-muted-foreground">
+                See how small changes in repayment behavior can save you thousands
+                in interest
+              </p>
+            </CardContent>
+          </Card>
         )}
       </main>
 
       {/* Save Modal */}
-      {showSaveModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-              Save Loan
-            </h3>
-            <div className="mb-4">
-              <label
-                htmlFor="saveName"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Loan Name (optional)
-              </label>
-              <input
+      <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Loan</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="saveName">Loan Name (optional)</Label>
+              <Input
                 id="saveName"
                 type="text"
                 value={saveName}
                 onChange={(e) => setSaveName(e.target.value)}
                 placeholder="e.g., Car Loan 2024"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 autoFocus
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground">
                 Leave blank to auto-generate a name
               </p>
             </div>
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={handleSaveLoan}
-                className="flex-1 bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                className="flex-1"
               >
                 Save
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="secondary"
                 onClick={() => {
                   setShowSaveModal(false);
                   setSaveName('');
                 }}
-                className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
+                className="flex-1"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 dark:text-gray-400 py-6 mt-12">

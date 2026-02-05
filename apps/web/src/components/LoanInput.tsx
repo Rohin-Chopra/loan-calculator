@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { LoanInput, RepaymentFrequency } from '../types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';

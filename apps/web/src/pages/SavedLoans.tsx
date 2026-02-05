@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { SavedLoan } from '../types';
 import { getSavedLoans, deleteSavedLoan } from '../utils/loanStorage';
 import { useTheme } from '../hooks/useTheme';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 export default function SavedLoans() {
   const { theme, toggleTheme } = useTheme();
@@ -99,117 +101,114 @@ export default function SavedLoans() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-4xl">
         {savedLoans.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-12 text-center">
-            <svg className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-4">
-              No saved loans yet
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
-              Save your loan calculations to access them later
-            </p>
-            <Link
-              to="/"
-              className="inline-block bg-blue-600 dark:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-            >
-              Go to Calculator
-            </Link>
-          </div>
+          <Card>
+            <CardContent className="p-12 text-center">
+              <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p className="text-lg mb-4">
+                No saved loans yet
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                Save your loan calculations to access them later
+              </p>
+              <Button asChild>
+                <Link to="/">
+                  Go to Calculator
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-4">
             {savedLoans.map((loan) => (
-              <div
-                key={loan.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                      {loan.name}
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">Principal:</span>
-                        <p className="font-semibold text-gray-800 dark:text-gray-200">
-                          {formatCurrency(loan.loanInput.principal)}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">Rate:</span>
-                        <p className="font-semibold text-gray-800 dark:text-gray-200">
-                          {(loan.loanInput.annualRate * 100).toFixed(2)}%
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">Term:</span>
-                        <p className="font-semibold text-gray-800 dark:text-gray-200">
-                          {loan.loanInput.termYears} years
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">Frequency:</span>
-                        <p className="font-semibold text-gray-800 dark:text-gray-200 capitalize">
-                          {loan.loanInput.frequency}
-                        </p>
-                      </div>
+              <Card key={loan.id} className="hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <CardTitle>{loan.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                    <div>
+                      <span className="text-muted-foreground">Principal:</span>
+                      <p className="font-semibold">
+                        {formatCurrency(loan.loanInput.principal)}
+                      </p>
                     </div>
-                    {(loan.extraPaymentPerPeriod > 0 || loan.lumpSums.length > 0) && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex flex-wrap gap-4 text-sm">
-                          {loan.extraPaymentPerPeriod > 0 && (
-                            <div>
-                              <span className="text-gray-500 dark:text-gray-400">Extra per period:</span>
-                              <span className="ml-2 font-semibold text-green-600 dark:text-green-400">
-                                {formatCurrency(loan.extraPaymentPerPeriod)}
-                              </span>
-                            </div>
-                          )}
-                          {loan.lumpSums.length > 0 && (
-                            <div>
-                              <span className="text-gray-500 dark:text-gray-400">Lump sums:</span>
-                              <span className="ml-2 font-semibold text-green-600 dark:text-green-400">
-                                {loan.lumpSums.length} payment{loan.lumpSums.length > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                      Saved {formatDate(loan.createdAt)}
-                      {loan.updatedAt !== loan.createdAt && (
-                        <span> • Updated {formatDate(loan.updatedAt)}</span>
-                      )}
+                    <div>
+                      <span className="text-muted-foreground">Rate:</span>
+                      <p className="font-semibold">
+                        {(loan.loanInput.annualRate * 100).toFixed(2)}%
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Term:</span>
+                      <p className="font-semibold">
+                        {loan.loanInput.termYears} years
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Frequency:</span>
+                      <p className="font-semibold capitalize">
+                        {loan.loanInput.frequency}
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={() => handleLoad(loan)}
-                    className="flex-1 bg-blue-600 dark:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-                  >
-                    Load Loan
-                  </button>
-                  <button
-                    onClick={() => handleDelete(loan.id)}
-                    disabled={deletingId === loan.id}
-                    className="px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Delete loan"
-                  >
-                    {deletingId === loan.id ? (
-                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                  {(loan.extraPaymentPerPeriod > 0 || loan.lumpSums.length > 0) && (
+                    <div className="mt-3 pt-3 border-t">
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        {loan.extraPaymentPerPeriod > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">Extra per period:</span>
+                            <span className="ml-2 font-semibold text-green-600 dark:text-green-400">
+                              {formatCurrency(loan.extraPaymentPerPeriod)}
+                            </span>
+                          </div>
+                        )}
+                        {loan.lumpSums.length > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">Lump sums:</span>
+                            <span className="ml-2 font-semibold text-green-600 dark:text-green-400">
+                              {loan.lumpSums.length} payment{loan.lumpSums.length > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div className="mt-3 text-xs text-muted-foreground">
+                    Saved {formatDate(loan.createdAt)}
+                    {loan.updatedAt !== loan.createdAt && (
+                      <span> • Updated {formatDate(loan.updatedAt)}</span>
                     )}
-                  </button>
-                </div>
-              </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => handleLoad(loan)}
+                      className="flex-1"
+                    >
+                      Load Loan
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDelete(loan.id)}
+                      disabled={deletingId === loan.id}
+                      size="icon"
+                      aria-label="Delete loan"
+                    >
+                      {deletingId === loan.id ? (
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
