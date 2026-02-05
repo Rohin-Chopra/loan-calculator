@@ -14,9 +14,11 @@ export function Header({ title, subtitle }: { title?: string; subtitle?: string 
       <div className="relative container mx-auto px-4 py-4 md:py-5">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight drop-shadow-lg">
-              {displayTitle}
-            </h1>
+            <Link to="/" className="block">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight drop-shadow-lg hover:opacity-90 transition-opacity cursor-pointer">
+                {displayTitle}
+              </h1>
+            </Link>
             {displaySubtitle && (
               <p className="text-blue-50 dark:text-blue-100 text-sm md:text-base max-w-2xl">
                 {displaySubtitle}
