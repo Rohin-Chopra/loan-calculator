@@ -1,4 +1,5 @@
 import type { LoanCalculation } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface RepaymentResultsProps {
   calculation: LoanCalculation;
@@ -27,40 +28,50 @@ export function RepaymentResults({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-        Your Loan Breakdown
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Minimum Payment</p>
-          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            {formatCurrency(calculation.periodicPayment)}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">per {frequency}</p>
-        </div>
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>Your Loan Breakdown</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground mb-1">Minimum Payment</p>
+              <p className="text-2xl font-bold">
+                {formatCurrency(calculation.periodicPayment)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">per {frequency}</p>
+            </CardContent>
+          </Card>
 
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Total Amount Paid</p>
-          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-            {formatCurrency(calculation.totalPayments)}
-          </p>
-        </div>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground mb-1">Total Amount Paid</p>
+              <p className="text-2xl font-bold">
+                {formatCurrency(calculation.totalPayments)}
+              </p>
+            </CardContent>
+          </Card>
 
-        <div className="bg-red-50 dark:bg-red-900/30 p-4 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400 mb-1">Total Interest Paid</p>
-          <p className="text-2xl font-bold text-red-700 dark:text-red-400">
-            {formatCurrency(calculation.totalInterest)}
-          </p>
-        </div>
+          <Card className="bg-destructive/10 border-destructive/20">
+            <CardContent className="p-4">
+              <p className="text-sm text-destructive mb-1">Total Interest Paid</p>
+              <p className="text-2xl font-bold text-destructive">
+                {formatCurrency(calculation.totalInterest)}
+              </p>
+            </CardContent>
+          </Card>
 
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Loan End Date</p>
-          <p className="text-xl font-bold text-gray-800 dark:text-gray-100">
-            {formatDate(calculation.loanEndDate)}
-          </p>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground mb-1">Loan End Date</p>
+              <p className="text-xl font-bold">
+                {formatDate(calculation.loanEndDate)}
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
