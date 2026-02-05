@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
+import { Switch } from '../ui/switch';
 import {
   Select,
   SelectContent,
@@ -17,10 +18,35 @@ interface LoanInputProps {
   initialValue?: LoanInput;
 }
 
+type LoanType = 'home' | 'car';
+
+const LOAN_PRESETS: Record<LoanType, { principal: string; annualRate: string; termYears: string }> = {
+  home: {
+    principal: '500000',
+    annualRate: '5.5',
+    termYears: '30',
+  },
+  car: {
+    principal: '52000',
+    annualRate: '9.5',
+    termYears: '7',
+  },
+};
+
 export function LoanInputForm({ onSubmit, initialValue }: LoanInputProps) {
-  const [principal, setPrincipal] = useState<string>(initialValue?.principal.toString() || '52000');
-  const [annualRate, setAnnualRate] = useState<string>(initialValue ? (initialValue.annualRate * 100).toString() : '9.5');
-  const [termYears, setTermYears] = useState<string>(initialValue?.termYears.toString() || '7');
+  // Determine initial loan type based on initialValue or default to 'car'
+  const getInitialLoanType = (): LoanType => {
+    if (initialValue) {
+      // If interest rate is <= 6%, consider it a home loan, otherwise car loan
+      return initialValue.annualRate <= 0.06 ? 'home' : 'car';
+    }
+    return 'car';
+  };
+
+  const [loanType, setLoanType] = useState<LoanType>(getInitialLoanType());
+  const [principal, setPrincipal] = useState<string>(initialValue?.principal.toString() || LOAN_PRESETS[getInitialLoanType()].principal);
+  const [annualRate, setAnnualRate] = useState<string>(initialValue ? (initialValue.annualRate * 100).toString() : LOAN_PRESETS[getInitialLoanType()].annualRate);
+  const [termYears, setTermYears] = useState<string>(initialValue?.termYears.toString() || LOAN_PRESETS[getInitialLoanType()].termYears);
   const [frequency, setFrequency] = useState<RepaymentFrequency>(initialValue?.frequency || 'fortnightly');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -31,8 +57,23 @@ export function LoanInputForm({ onSubmit, initialValue }: LoanInputProps) {
       setAnnualRate((initialValue.annualRate * 100).toString());
       setTermYears(initialValue.termYears.toString());
       setFrequency(initialValue.frequency);
+      // Update loan type based on interest rate
+      setLoanType(initialValue.annualRate <= 0.06 ? 'home' : 'car');
     }
   }, [initialValue]);
+
+  // Handle loan type toggle
+  const handleLoanTypeChange = (checked: boolean) => {
+    const newLoanType: LoanType = checked ? 'home' : 'car';
+    setLoanType(newLoanType);
+    
+    // Only update if form fields haven't been manually modified
+    // We'll update them when switching loan types
+    const preset = LOAN_PRESETS[newLoanType];
+    setPrincipal(preset.principal);
+    setAnnualRate(preset.annualRate);
+    setTermYears(preset.termYears);
+  };
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -80,6 +121,24 @@ export function LoanInputForm({ onSubmit, initialValue }: LoanInputProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Loan Type Toggle */}
+          <div className="flex flex-col items-center gap-3 p-4 bg-muted/50 rounded-lg border-2 border-border">
+            <Label className="text-base font-semibold">Loan Type</Label>
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-medium ${loanType === 'car' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Car Loan
+              </span>
+              <Switch
+                checked={loanType === 'home'}
+                onCheckedChange={handleLoanTypeChange}
+                aria-label="Toggle loan type"
+              />
+              <span className={`text-sm font-medium ${loanType === 'home' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Home Loan
+              </span>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="principal" className="text-base font-semibold">
