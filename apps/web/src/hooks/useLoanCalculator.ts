@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { LoanInput, LumpSumPayment, SavedLoan } from '../types';
 import { calculateLoanSchedule } from '../utils/loanCalculator';
+import { getSavedLoan } from '../utils/loanStorage';
 
 function getPaymentsPerYear(frequency: string): number {
   switch (frequency) {
@@ -15,14 +16,27 @@ function getPaymentsPerYear(frequency: string): number {
   }
 }
 
-export function useLoanCalculator() {
+export function useLoanCalculator(loanIdFromUrl?: string | null) {
   const [loanInput, setLoanInput] = useState<LoanInput | null>(null);
   const [extraPaymentPerPeriod, setExtraPaymentPerPeriod] = useState<number>(0);
   const [lumpSums, setLumpSums] = useState<LumpSumPayment[]>([]);
   const [currentLoanId, setCurrentLoanId] = useState<string | null>(null);
 
-  // Load saved loan from sessionStorage if present
+  // Load saved loan from URL parameter, sessionStorage (backward compatibility), or localStorage
   useEffect(() => {
+    // Priority 1: Load from URL parameter
+    if (loanIdFromUrl) {
+      const savedLoan = getSavedLoan(loanIdFromUrl);
+      if (savedLoan) {
+        setLoanInput(savedLoan.loanInput);
+        setExtraPaymentPerPeriod(savedLoan.extraPaymentPerPeriod);
+        setLumpSums(savedLoan.lumpSums);
+        setCurrentLoanId(savedLoan.id);
+        return; // Don't check sessionStorage if URL param is present
+      }
+    }
+
+    // Priority 2: Load from sessionStorage (backward compatibility)
     const loadLoanData = sessionStorage.getItem('loadLoan');
     if (loadLoanData) {
       try {
@@ -36,7 +50,7 @@ export function useLoanCalculator() {
         console.error('Failed to load saved loan:', e);
       }
     }
-  }, []);
+  }, [loanIdFromUrl]);
 
   // Calculate baseline (minimum repayment only)
   const baselineCalculation = useMemo(() => {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
 import { LoanInputForm } from '../components/loan/LoanInputForm';
 import { RepaymentResults } from '../components/loan/RepaymentResults';
@@ -16,6 +17,9 @@ import { saveLoan, updateSavedLoan, getSavedLoan } from '../utils/loanStorage';
 import type { LoanInput, LumpSumPayment } from '../types';
 
 export default function Calculator() {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  
   const {
     loanInput,
     extraPaymentPerPeriod,
@@ -29,7 +33,19 @@ export default function Calculator() {
     setExtraPaymentPerPeriod,
     setLumpSums,
     setCurrentLoanId,
-  } = useLoanCalculator();
+  } = useLoanCalculator(id);
+
+  // Handle invalid loan ID in URL
+  useEffect(() => {
+    if (id && !currentLoanId && !loanInput) {
+      // Check if loan exists
+      const savedLoan = getSavedLoan(id);
+      if (!savedLoan) {
+        // Loan doesn't exist, redirect to home
+        navigate('/', { replace: true });
+      }
+    }
+  }, [id, currentLoanId, loanInput, navigate]);
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveName, setSaveName] = useState('');
@@ -70,6 +86,10 @@ export default function Calculator() {
       const updated = updateSavedLoan(currentLoanId, updateData);
       
       if (updated) {
+        // Update URL to reflect the loan ID if not already there
+        if (id !== currentLoanId) {
+          navigate(`/loan/${currentLoanId}`, { replace: true });
+        }
         setShowSaveModal(false);
         setSaveName('');
         alert('Loan updated successfully!');
@@ -80,6 +100,8 @@ export default function Calculator() {
       // Create new loan
       const newLoan = saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
       setCurrentLoanId(newLoan.id); // Set the current loan ID so future updates work
+      // Navigate to the loan's URL
+      navigate(`/loan/${newLoan.id}`, { replace: true });
       setShowSaveModal(false);
       setSaveName('');
       alert('Loan saved successfully!');
@@ -94,23 +116,36 @@ export default function Calculator() {
       {/* Results Section */}
       {loanInput && baselineCalculation && (
         <>
-          {/* Save Button */}
-          <div className="mb-6 flex justify-end">
-            <Button
-              onClick={() => setShowSaveModal(true)}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6"
-            >
-              {currentLoanId ? (
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          {/* Save Button and Loan Info */}
+          <div className="mb-6 flex justify-between items-center gap-4">
+            {currentLoanId && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
-              ) : (
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                </svg>
-              )}
-              {currentLoanId ? 'Update Loan' : 'Save Loan'}
-            </Button>
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  {getSavedLoan(currentLoanId)?.name || 'Saved Loan'}
+                </span>
+                <span className="text-xs text-muted-foreground">• Bookmarkable</span>
+              </div>
+            )}
+            <div className="ml-auto">
+              <Button
+                onClick={() => setShowSaveModal(true)}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6"
+              >
+                {currentLoanId ? (
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                )}
+                {currentLoanId ? 'Update Loan' : 'Save Loan'}
+              </Button>
+            </div>
           </div>
 
           <RepaymentResults

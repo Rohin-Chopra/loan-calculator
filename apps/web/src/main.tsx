@@ -10,6 +10,7 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Calculator />} />
+        <Route path="/loan/:id" element={<Calculator />} />
         <Route path="/saved" element={<SavedLoans />} />
       </Routes>
     </BrowserRouter>

@@ -10,6 +10,7 @@ export default function SavedLoans() {
   const navigate = useNavigate();
   const [savedLoans, setSavedLoans] = useState<SavedLoan[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     setSavedLoans(getSavedLoans());
@@ -28,9 +29,20 @@ export default function SavedLoans() {
   };
 
   const handleLoad = (loan: SavedLoan) => {
-    // Store loan data in sessionStorage to load in Calculator
-    sessionStorage.setItem('loadLoan', JSON.stringify(loan));
-    navigate('/');
+    // Navigate to the loan's dedicated URL (bookmarkable)
+    navigate(`/loan/${loan.id}`);
+  };
+
+  const handleCopyLink = async (loanId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/loan/${loanId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(loanId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -95,7 +107,7 @@ export default function SavedLoans() {
         ) : (
           <div className="space-y-6">
             {savedLoans.map((loan) => (
-              <Card key={loan.id} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 shadow-lg">
+              <Card key={loan.id} className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 shadow-lg cursor-pointer" onClick={() => handleLoad(loan)}>
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
                     {loan.name}
@@ -156,12 +168,30 @@ export default function SavedLoans() {
                       <span> • Updated {formatDate(loan.updatedAt)}</span>
                     )}
                   </div>
-                  <div className="flex gap-3 mt-6">
+                  <div className="flex gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
                     <Button
                       onClick={() => handleLoad(loan)}
                       className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200"
                     >
-                      Load Loan
+                      View Loan
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={(e) => handleCopyLink(loan.id, e)}
+                      size="icon"
+                      aria-label="Copy loan link"
+                      className="h-11 w-11"
+                      title="Copy link to bookmark"
+                    >
+                      {copiedId === loan.id ? (
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
                     </Button>
                     <Button
                       variant="destructive"
