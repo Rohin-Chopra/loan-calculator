@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { LoanInput, LoanCalculation, LumpSumPayment } from './types';
+import type { LoanInput, LumpSumPayment } from './types';
 import { calculateLoanSchedule } from './utils/loanCalculator';
 import { LoanInputForm } from './components/LoanInput';
 import { RepaymentResults } from './components/RepaymentResults';
