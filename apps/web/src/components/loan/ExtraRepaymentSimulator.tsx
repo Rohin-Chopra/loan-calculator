@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { LoanInput } from '../../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -18,6 +18,14 @@ export function ExtraRepaymentSimulator({
   onExtraPaymentChange,
 }: ExtraRepaymentSimulatorProps) {
   const [customAmount, setCustomAmount] = useState<string>('');
+  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+
+  // Sync customAmount when extraPayment changes externally (e.g., when loan is reset)
+  useEffect(() => {
+    if (!hasInteracted && extraPayment === 0) {
+      setCustomAmount('');
+    }
+  }, [extraPayment, hasInteracted]);
 
   // Quick select buttons
   const quickAmounts = [25, 50, 100, 200];
@@ -25,10 +33,12 @@ export function ExtraRepaymentSimulator({
   const handleQuickSelect = (amount: number) => {
     onExtraPaymentChange(amount);
     setCustomAmount('');
+    setHasInteracted(false);
   };
 
   const handleCustomChange = (value: string) => {
     setCustomAmount(value);
+    setHasInteracted(true);
     const numValue = parseFloat(value) || 0;
     onExtraPaymentChange(numValue);
   };
@@ -37,6 +47,7 @@ export function ExtraRepaymentSimulator({
     const numValue = values[0];
     onExtraPaymentChange(numValue);
     setCustomAmount(numValue.toString());
+    setHasInteracted(false);
   };
 
   const formatCurrency = (amount: number) => {
@@ -108,7 +119,7 @@ export function ExtraRepaymentSimulator({
             type="number"
             step="25"
             min="0"
-            value={customAmount || extraPayment}
+            value={hasInteracted ? customAmount : (customAmount || extraPayment.toString())}
             onChange={(e) => handleCustomChange(e.target.value)}
             placeholder="Enter custom amount"
             className="h-12 text-lg"
