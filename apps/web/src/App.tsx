@@ -181,18 +181,7 @@ function App() {
               )}
 
             {/* Chart */}
-            <LoanChart
-              baseline={baselineCalculation}
-              accelerated={
-                acceleratedCalculation &&
-                (extraPaymentPerPeriod > 0 || lumpSums.length > 0) &&
-                acceleratedCalculation.schedule.length <
-                  baselineCalculation.schedule.length
-                  ? acceleratedCalculation
-                  : undefined
-              }
-              loanInput={loanInput}
-            />
+            <LoanChart loanInput={loanInput} />
           </>
         )}
 
