@@ -1,38 +1,37 @@
-import { useState, useEffect } from 'react';
-import type { LoanInput, LoanCalculation } from '../types';
-import { calculateLoanSchedule } from '../utils/loanCalculator';
+import { useState } from 'react';
+import type { LoanInput } from '../types';
 
 interface ExtraRepaymentSimulatorProps {
   loanInput: LoanInput;
-  baselineCalculation: LoanCalculation;
-  onCalculationChange: (calculation: LoanCalculation) => void;
+  extraPayment: number;
+  onExtraPaymentChange: (amount: number) => void;
 }
 
 export function ExtraRepaymentSimulator({
   loanInput,
-  baselineCalculation,
-  onCalculationChange,
+  extraPayment,
+  onExtraPaymentChange,
 }: ExtraRepaymentSimulatorProps) {
-  const [extraPayment, setExtraPayment] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>('');
 
   // Quick select buttons
   const quickAmounts = [25, 50, 100, 200];
 
-  useEffect(() => {
-    const calculation = calculateLoanSchedule(loanInput, extraPayment);
-    onCalculationChange(calculation);
-  }, [extraPayment, loanInput, onCalculationChange]);
-
   const handleQuickSelect = (amount: number) => {
-    setExtraPayment(amount);
+    onExtraPaymentChange(amount);
     setCustomAmount('');
   };
 
   const handleCustomChange = (value: string) => {
     setCustomAmount(value);
     const numValue = parseFloat(value) || 0;
-    setExtraPayment(numValue);
+    onExtraPaymentChange(numValue);
+  };
+
+  const handleSliderChange = (value: string) => {
+    const numValue = parseFloat(value);
+    onExtraPaymentChange(numValue);
+    setCustomAmount(value);
   };
 
   const formatCurrency = (amount: number) => {
@@ -88,10 +87,7 @@ export function ExtraRepaymentSimulator({
             max="500"
             step="25"
             value={extraPayment}
-            onChange={(e) => {
-              setExtraPayment(parseFloat(e.target.value));
-              setCustomAmount(e.target.value);
-            }}
+            onChange={(e) => handleSliderChange(e.target.value)}
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
