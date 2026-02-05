@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "clean": "rm -rf dist .turbo"
+    "clean": "rm -rf dist .turbo",
+    "deploy": "sh ../../terraform/deploy.sh"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

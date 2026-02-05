@@ -7,9 +7,7 @@ echo "🚀 Starting deployment..."
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-echo "📦 Building application..."
 cd "$PROJECT_ROOT/apps/web"
-pnpm build
 
 if [ ! -d "dist" ]; then
   echo "❌ Build failed: dist directory not found"
