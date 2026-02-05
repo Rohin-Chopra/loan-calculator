@@ -48,16 +48,16 @@ export function ExtraRepaymentSimulator({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         Extra Repayments Simulator
       </h2>
-      <p className="text-gray-600 mb-4">
+      <p className="text-gray-600 dark:text-gray-300 mb-4">
         See how extra repayments reduce your interest and loan term
       </p>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Extra Payment per {formatFrequency(loanInput.frequency)}
         </label>
         
@@ -71,7 +71,7 @@ export function ExtraRepaymentSimulator({
               className={`px-4 py-2 rounded-lg border transition-colors ${
                 extraPayment === amount
                   ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
               }`}
             >
               ${amount}
@@ -88,9 +88,9 @@ export function ExtraRepaymentSimulator({
             step="25"
             value={extraPayment}
             onChange={(e) => handleSliderChange(e.target.value)}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
           />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
             <span>$0</span>
             <span>$500</span>
           </div>
@@ -103,14 +103,14 @@ export function ExtraRepaymentSimulator({
           min="0"
           value={customAmount || extraPayment}
           onChange={(e) => handleCustomChange(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter custom amount"
         />
       </div>
 
       {extraPayment > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-800 mb-2">
+        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <p className="text-sm text-green-800 dark:text-green-300 mb-2">
             <strong>Extra payment:</strong> {formatCurrency(extraPayment)} per{' '}
             {formatFrequency(loanInput.frequency)}
           </p>

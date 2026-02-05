@@ -47,15 +47,15 @@ export function LoanInputForm({ onSubmit }: LoanInputProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         Loan Details
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
             htmlFor="principal"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Loan Amount ($)
           </label>
@@ -65,20 +65,20 @@ export function LoanInputForm({ onSubmit }: LoanInputProps) {
             step="1000"
             value={principal}
             onChange={(e) => setPrincipal(e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.principal ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              errors.principal ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="52000"
           />
           {errors.principal && (
-            <p className="text-red-500 text-sm mt-1">{errors.principal}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.principal}</p>
           )}
         </div>
 
         <div>
           <label
             htmlFor="annualRate"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Interest Rate (% per year)
           </label>
@@ -88,20 +88,20 @@ export function LoanInputForm({ onSubmit }: LoanInputProps) {
             step="0.1"
             value={annualRate}
             onChange={(e) => setAnnualRate(e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.annualRate ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              errors.annualRate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="9.5"
           />
           {errors.annualRate && (
-            <p className="text-red-500 text-sm mt-1">{errors.annualRate}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.annualRate}</p>
           )}
         </div>
 
         <div>
           <label
             htmlFor="termYears"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Loan Term (years)
           </label>
@@ -111,20 +111,20 @@ export function LoanInputForm({ onSubmit }: LoanInputProps) {
             step="0.5"
             value={termYears}
             onChange={(e) => setTermYears(e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.termYears ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              errors.termYears ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="7"
           />
           {errors.termYears && (
-            <p className="text-red-500 text-sm mt-1">{errors.termYears}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errors.termYears}</p>
           )}
         </div>
 
         <div>
           <label
             htmlFor="frequency"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Repayment Frequency
           </label>
@@ -134,7 +134,7 @@ export function LoanInputForm({ onSubmit }: LoanInputProps) {
             onChange={(e) =>
               setFrequency(e.target.value as RepaymentFrequency)
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="weekly">Weekly</option>
             <option value="fortnightly">Fortnightly</option>
@@ -144,7 +144,7 @@ export function LoanInputForm({ onSubmit }: LoanInputProps) {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full bg-blue-600 dark:bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
         >
           Calculate Loan
         </button>
