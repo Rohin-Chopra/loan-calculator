@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { MainLayout } from '../components/layout/MainLayout';
 import { LoanInputForm } from '../components/loan/LoanInputForm';
 import { RepaymentResults } from '../components/loan/RepaymentResults';
@@ -92,9 +93,9 @@ export default function Calculator() {
         }
         setShowSaveModal(false);
         setSaveName('');
-        alert('Loan updated successfully!');
+        toast.success('Loan updated successfully!');
       } else {
-        alert('Failed to update loan. Please try again.');
+        toast.error('Failed to update loan. Please try again.');
       }
     } else {
       // Create new loan
@@ -104,7 +105,7 @@ export default function Calculator() {
       navigate(`/loan/${newLoan.id}`, { replace: true });
       setShowSaveModal(false);
       setSaveName('');
-      alert('Loan saved successfully!');
+      toast.success('Loan saved successfully!');
     }
   };
 
