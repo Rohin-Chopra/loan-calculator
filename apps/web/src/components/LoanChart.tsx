@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -8,17 +9,22 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { LoanCalculation } from '../types';
+import type { LoanCalculation, LoanInput } from '../types';
 import { useTheme } from '../hooks/useTheme';
+import { calculateLoanSchedule } from '../utils/loanCalculator';
+
+type FrequencyOption = 'fortnightly' | 'monthly' | 'yearly';
 
 interface LoanChartProps {
   baseline: LoanCalculation;
   accelerated?: LoanCalculation;
+  loanInput: LoanInput;
 }
 
-export function LoanChart({ baseline, accelerated }: LoanChartProps) {
+export function LoanChart({ baseline, accelerated, loanInput }: LoanChartProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [selectedFrequency, setSelectedFrequency] = useState<FrequencyOption>('monthly');
   
   // Prepare data for chart - sample every Nth period to keep it manageable
   const sampleRate = Math.max(1, Math.floor(baseline.schedule.length / 50));
