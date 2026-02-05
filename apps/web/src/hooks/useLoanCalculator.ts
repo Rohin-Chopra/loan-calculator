@@ -19,6 +19,7 @@ export function useLoanCalculator() {
   const [loanInput, setLoanInput] = useState<LoanInput | null>(null);
   const [extraPaymentPerPeriod, setExtraPaymentPerPeriod] = useState<number>(0);
   const [lumpSums, setLumpSums] = useState<LumpSumPayment[]>([]);
+  const [currentLoanId, setCurrentLoanId] = useState<string | null>(null);
 
   // Load saved loan from sessionStorage if present
   useEffect(() => {
@@ -29,6 +30,7 @@ export function useLoanCalculator() {
         setLoanInput(savedLoan.loanInput);
         setExtraPaymentPerPeriod(savedLoan.extraPaymentPerPeriod);
         setLumpSums(savedLoan.lumpSums);
+        setCurrentLoanId(savedLoan.id);
         sessionStorage.removeItem('loadLoan');
       } catch (e) {
         console.error('Failed to load saved loan:', e);
@@ -52,6 +54,7 @@ export function useLoanCalculator() {
     setLoanInput(input);
     setExtraPaymentPerPeriod(0);
     setLumpSums([]);
+    setCurrentLoanId(null); // Clear current loan ID when submitting new loan
   };
 
   const paymentsPerYear = loanInput
@@ -72,6 +75,7 @@ export function useLoanCalculator() {
     acceleratedCalculation,
     paymentsPerYear,
     showAcceleratedResults,
+    currentLoanId,
     handleLoanSubmit,
     setExtraPaymentPerPeriod,
     setLumpSums,

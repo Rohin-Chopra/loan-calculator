@@ -19,6 +19,13 @@ export function SummaryPanel({
       (1000 * 60 * 60 * 24 * 30.44)) | 0; // Approximate months
   const timeSavedYears = timeSavedMonths / 12;
 
+  // Calculate duration until loan payoff
+  const now = new Date();
+  const payoffDurationMonths = Math.max(0,
+    ((accelerated.loanEndDate.getTime() - now.getTime()) /
+      (1000 * 60 * 60 * 24 * 30.44)) | 0
+  ); // Approximate months, ensure non-negative
+
   // Calculate total extra payments made
   const totalExtraPayments =
     extraPaymentPerPeriod * accelerated.schedule.length;
@@ -91,6 +98,21 @@ export function SummaryPanel({
               </p>
               <p className="text-xs text-muted-foreground font-medium">
                 ⏰ You finish {timeSavedYears > 1 ? `${timeSavedYears.toFixed(1)} years` : `${timeSavedMonths} months`} earlier
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-orange-200 dark:border-orange-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Loan Payoff Duration</p>
+              </div>
+              <p className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                {formatTime(payoffDurationMonths)}
+              </p>
+              <p className="text-xs text-muted-foreground font-medium">
+                📅 Your loan will be paid off in {formatTime(payoffDurationMonths)}
               </p>
             </CardContent>
           </Card>

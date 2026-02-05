@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MainLayout } from '../components/layout/MainLayout';
 import { LoanInputForm } from '../components/loan/LoanInputForm';
 import { RepaymentResults } from '../components/loan/RepaymentResults';
@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent } from '../components/ui/card';
-import { saveLoan } from '../utils/loanStorage';
+import { saveLoan, updateSavedLoan, getSavedLoan } from '../utils/loanStorage';
+import type { LoanInput, LumpSumPayment } from '../types';
 
 export default function Calculator() {
   const {
@@ -23,6 +24,7 @@ export default function Calculator() {
     acceleratedCalculation,
     paymentsPerYear,
     showAcceleratedResults,
+    currentLoanId,
     handleLoanSubmit,
     setExtraPaymentPerPeriod,
     setLumpSums,
@@ -31,13 +33,55 @@ export default function Calculator() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveName, setSaveName] = useState('');
 
+  // Load loan name when opening save modal if editing existing loan
+  useEffect(() => {
+    if (showSaveModal && currentLoanId) {
+      const savedLoan = getSavedLoan(currentLoanId);
+      if (savedLoan) {
+        setSaveName(savedLoan.name);
+      }
+    } else if (!showSaveModal) {
+      setSaveName('');
+    }
+  }, [showSaveModal, currentLoanId]);
+
   const handleSaveLoan = () => {
     if (!loanInput) return;
     
-    saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
-    setShowSaveModal(false);
-    setSaveName('');
-    alert('Loan saved successfully!');
+    if (currentLoanId) {
+      // Update existing loan
+      const updateData: {
+        loanInput: LoanInput;
+        extraPaymentPerPeriod: number;
+        lumpSums: LumpSumPayment[];
+        name?: string;
+      } = {
+        loanInput,
+        extraPaymentPerPeriod,
+        lumpSums,
+      };
+      
+      // Only update name if provided
+      if (saveName.trim()) {
+        updateData.name = saveName.trim();
+      }
+      
+      const updated = updateSavedLoan(currentLoanId, updateData);
+      
+      if (updated) {
+        setShowSaveModal(false);
+        setSaveName('');
+        alert('Loan updated successfully!');
+      } else {
+        alert('Failed to update loan. Please try again.');
+      }
+    } else {
+      // Create new loan
+      saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
+      setShowSaveModal(false);
+      setSaveName('');
+      alert('Loan saved successfully!');
+    }
   };
 
   return (
@@ -54,10 +98,16 @@ export default function Calculator() {
               onClick={() => setShowSaveModal(true)}
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-              Save Loan
+              {currentLoanId ? (
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+              )}
+              {currentLoanId ? 'Update Loan' : 'Save Loan'}
             </Button>
           </div>
 
@@ -124,7 +174,7 @@ export default function Calculator() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
-              Save Loan
+              {currentLoanId ? 'Update Loan' : 'Save Loan'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
@@ -148,7 +198,7 @@ export default function Calculator() {
                 onClick={handleSaveLoan}
                 className="flex-1 h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                Save
+                {currentLoanId ? 'Update' : 'Save'}
               </Button>
               <Button
                 variant="secondary"
