@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import type { LoanCalculation } from '../types';
+import { useTheme } from '../hooks/useTheme';
 
 interface LoanChartProps {
   baseline: LoanCalculation;
@@ -16,6 +17,9 @@ interface LoanChartProps {
 }
 
 export function LoanChart({ baseline, accelerated }: LoanChartProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
   // Prepare data for chart - sample every Nth period to keep it manageable
   const sampleRate = Math.max(1, Math.floor(baseline.schedule.length / 50));
   
@@ -55,16 +59,16 @@ export function LoanChart({ baseline, accelerated }: LoanChartProps) {
       maximumFractionDigits: 0,
     }).format(value);
   };
-
+  
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         Loan Balance Over Time
       </h2>
       <div className="h-64 md:h-96">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#374151" : "#e5e7eb"} />
             <XAxis
               dataKey="period"
               label={{
@@ -72,7 +76,7 @@ export function LoanChart({ baseline, accelerated }: LoanChartProps) {
                 position: 'insideBottom',
                 offset: -5,
               }}
-              stroke="#6b7280"
+              stroke={isDark ? "#9ca3af" : "#6b7280"}
             />
             <YAxis
               label={{
@@ -80,19 +84,20 @@ export function LoanChart({ baseline, accelerated }: LoanChartProps) {
                 angle: -90,
                 position: 'insideLeft',
               }}
-              stroke="#6b7280"
+              stroke={isDark ? "#9ca3af" : "#6b7280"}
               tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
             />
             <Tooltip
               formatter={(value: number) => formatCurrency(value)}
               labelFormatter={(label) => `Period ${label}`}
               contentStyle={{
-                backgroundColor: '#fff',
-                border: '1px solid #e5e7eb',
+                backgroundColor: isDark ? '#1f2937' : '#fff',
+                border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
                 borderRadius: '8px',
+                color: isDark ? '#f3f4f6' : '#111827',
               }}
             />
-            <Legend />
+            <Legend wrapperStyle={{ color: isDark ? '#f3f4f6' : '#111827' }} />
             <Line
               type="monotone"
               dataKey="baseline"
