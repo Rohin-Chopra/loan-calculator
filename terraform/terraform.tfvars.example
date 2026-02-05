@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and customize as needed
+# terraform.tfvars is gitignored to avoid committing sensitive values
+
+aws_region  = "ap-southeast-4"
+domain_name = "loans.rohinchopra.com"
+bucket_name = "loans-rohinchopra-com"
+environment = "production"
