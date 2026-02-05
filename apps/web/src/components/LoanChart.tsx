@@ -25,37 +25,57 @@ export function LoanChart({ baseline, accelerated, loanInput }: LoanChartProps) 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [selectedFrequency, setSelectedFrequency] = useState<FrequencyOption>('monthly');
-  
+
+  // Calculate schedule for selected frequency
+  const selectedFrequencyCalculation = useMemo(() => {
+    if (selectedFrequency === 'yearly') {
+      // Calculate yearly payments manually
+      const paymentsPerYear = 1;
+      const periodicRate = loanInput.annualRate / paymentsPerYear;
+      const totalPayments = paymentsPerYear * loanInput.termYears;
+      
+      // Calculate minimum payment using amortization formula
+      const periodicPayment = periodicRate === 0
+        ? loanInput.principal / totalPayments
+        : loanInput.principal * (periodicRate / (1 - Math.pow(1 + periodicRate, -totalPayments)));
+      
+      // Calculate schedule
+      const schedule: Array<{ period: number; balance: number }> = [];
+      let balance = loanInput.principal;
+      let period = 0;
+      
+      while (balance > 0.01 && period < totalPayments) {
+        const interestPaid = balance * periodicRate;
+        const principalPaid = Math.min(periodicPayment - interestPaid, balance);
+        balance -= principalPaid;
+        period++;
+        schedule.push({ period, balance: Math.max(0, balance) });
+      }
+      
+      return schedule;
+    }
+
+    const frequencyLoanInput: LoanInput = {
+      ...loanInput,
+      frequency: selectedFrequency,
+    };
+    
+    const calculation = calculateLoanSchedule(frequencyLoanInput);
+    return calculation.schedule.map(item => ({
+      period: item.period,
+      balance: item.balance,
+    }));
+  }, [selectedFrequency, loanInput]);
+
   // Prepare data for chart - sample every Nth period to keep it manageable
-  const sampleRate = Math.max(1, Math.floor(baseline.schedule.length / 50));
+  const sampleRate = Math.max(1, Math.floor(selectedFrequencyCalculation.length / 50));
   
-  const baselineData = baseline.schedule
-    .filter((_, index) => index % sampleRate === 0 || index === baseline.schedule.length - 1)
+  const chartData = selectedFrequencyCalculation
+    .filter((_, index) => index % sampleRate === 0 || index === selectedFrequencyCalculation.length - 1)
     .map((item) => ({
       period: item.period,
-      baseline: Math.round(item.balance),
-      accelerated: 0,
+      balance: Math.round(item.balance),
     }));
-
-  const acceleratedData = accelerated
-    ? accelerated.schedule
-        .filter((_, index) => index % sampleRate === 0 || index === accelerated.schedule.length - 1)
-        .map((item) => ({
-          period: item.period,
-          baseline: 0,
-          accelerated: Math.round(item.balance),
-        }))
-    : [];
-
-  // Merge data
-  const chartData = baselineData.map((item, index) => {
-    const accelItem = acceleratedData[index];
-    return {
-      period: item.period,
-      baseline: item.baseline,
-      accelerated: accelItem?.accelerated ?? item.baseline,
-    };
-  });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-AU', {
