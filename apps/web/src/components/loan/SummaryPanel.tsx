@@ -1,6 +1,6 @@
-import type { LoanCalculation } from '../types';
-import { calculateEquivalentReturn } from '../utils/loanCalculator';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import type { LoanCalculation } from '../../types';
+import { calculateEquivalentReturn } from '../../utils/loanCalculator';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 interface SummaryPanelProps {
   baseline: LoanCalculation;

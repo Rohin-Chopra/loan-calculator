@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import type { LoanInput, RepaymentFrequency } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Button } from './ui/button';
+import type { LoanInput, RepaymentFrequency } from '../../types';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
+} from '../ui/select';
 
 interface LoanInputProps {
   onSubmit: (input: LoanInput) => void;

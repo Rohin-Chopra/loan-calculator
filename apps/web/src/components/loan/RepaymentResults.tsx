@@ -1,5 +1,5 @@
-import type { LoanCalculation } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import type { LoanCalculation } from '../../types';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 interface RepaymentResultsProps {
   calculation: LoanCalculation;

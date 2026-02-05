@@ -9,9 +9,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { LoanInput, LumpSumPayment } from '../types';
-import { useTheme } from '../hooks/useTheme';
-import { calculateLoanSchedule } from '../utils/loanCalculator';
+import type { LoanInput, LumpSumPayment } from '../../types';
+import { useTheme } from '../../hooks/useTheme';
+import { calculateLoanSchedule } from '../../utils/loanCalculator';
 
 type FrequencyOption = 'fortnightly' | 'monthly' | 'yearly';
 

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import type { LoanInput } from '../types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Slider } from './ui/slider';
+import type { LoanInput } from '../../types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Slider } from '../ui/slider';
 
 interface ExtraRepaymentSimulatorProps {
   loanInput: LoanInput;
