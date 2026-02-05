@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { LoanInput } from '../types';
+import type { LoanInput, LumpSumPayment } from '../types';
 import { useTheme } from '../hooks/useTheme';
 import { calculateLoanSchedule } from '../utils/loanCalculator';
 
@@ -17,15 +17,42 @@ type FrequencyOption = 'fortnightly' | 'monthly' | 'yearly';
 
 interface LoanChartProps {
   loanInput: LoanInput;
+  extraPaymentPerPeriod?: number;
+  lumpSums?: LumpSumPayment[];
 }
 
-export function LoanChart({ loanInput }: LoanChartProps) {
+export function LoanChart({ loanInput, extraPaymentPerPeriod = 0, lumpSums = [] }: LoanChartProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [selectedFrequency, setSelectedFrequency] = useState<FrequencyOption>('monthly');
 
-  // Calculate schedule for selected frequency
-  const selectedFrequencyCalculation = useMemo(() => {
+  const hasExtraPayments = extraPaymentPerPeriod > 0 || lumpSums.length > 0;
+
+  // Helper function to convert extra payment to selected frequency
+  const convertExtraPayment = (originalFreq: string, targetFreq: FrequencyOption, extraPayment: number): number => {
+    if (originalFreq === targetFreq) return extraPayment;
+    
+    // Get payments per year for each frequency
+    const getPaymentsPerYear = (freq: string): number => {
+      switch (freq) {
+        case 'weekly': return 52;
+        case 'fortnightly': return 26;
+        case 'monthly': return 12;
+        case 'yearly': return 1;
+        default: return 12;
+      }
+    };
+    
+    const originalPaymentsPerYear = getPaymentsPerYear(originalFreq);
+    const targetPaymentsPerYear = getPaymentsPerYear(targetFreq);
+    
+    // Convert: extra payment per period * periods per year = total extra per year
+    // Then divide by target periods per year
+    return (extraPayment * originalPaymentsPerYear) / targetPaymentsPerYear;
+  };
+
+  // Calculate baseline schedule for selected frequency
+  const baselineSchedule = useMemo(() => {
     if (selectedFrequency === 'yearly') {
       // Calculate yearly payments manually
       const paymentsPerYear = 1;
@@ -58,22 +85,100 @@ export function LoanChart({ loanInput }: LoanChartProps) {
       frequency: selectedFrequency,
     };
     
-    const calculation = calculateLoanSchedule(frequencyLoanInput);
+    const calculation = calculateLoanSchedule(frequencyLoanInput, 0, []);
     return calculation.schedule.map(item => ({
       period: item.period,
       balance: item.balance,
     }));
   }, [selectedFrequency, loanInput]);
 
-  // Prepare data for chart - sample every Nth period to keep it manageable
-  const sampleRate = Math.max(1, Math.floor(selectedFrequencyCalculation.length / 50));
-  
-  const chartData = selectedFrequencyCalculation
-    .filter((_, index) => index % sampleRate === 0 || index === selectedFrequencyCalculation.length - 1)
-    .map((item) => ({
+  // Calculate accelerated schedule for selected frequency
+  const acceleratedSchedule = useMemo(() => {
+    if (!hasExtraPayments) return null;
+
+    if (selectedFrequency === 'yearly') {
+      // For yearly, we need to convert extra payments appropriately
+      // Since yearly payments are much larger, we'll scale the extra payment
+      const paymentsPerYear = 1;
+      const periodicRate = loanInput.annualRate / paymentsPerYear;
+      const totalPayments = paymentsPerYear * loanInput.termYears;
+      
+      // Calculate minimum payment
+      const periodicPayment = periodicRate === 0
+        ? loanInput.principal / totalPayments
+        : loanInput.principal * (periodicRate / (1 - Math.pow(1 + periodicRate, -totalPayments)));
+      
+      // Convert extra payment to yearly equivalent
+      const yearlyExtraPayment = convertExtraPayment(loanInput.frequency, 'yearly', extraPaymentPerPeriod);
+      
+      // Calculate schedule with extra payments
+      const schedule: Array<{ period: number; balance: number }> = [];
+      let balance = loanInput.principal;
+      let period = 0;
+      const lumpSumMap = new Map(lumpSums.map(ls => [ls.period, ls.amount]));
+      
+      while (balance > 0.01 && period < totalPayments) {
+        // Apply lump sum if applicable
+        if (lumpSumMap.has(period)) {
+          balance -= lumpSumMap.get(period)!;
+          if (balance < 0) balance = 0;
+        }
+
+        if (balance <= 0.01) break;
+
+        const interestPaid = balance * periodicRate;
+        const totalPayment = periodicPayment + yearlyExtraPayment;
+        const principalPaid = Math.min(totalPayment - interestPaid, balance);
+        balance -= principalPaid;
+        period++;
+        schedule.push({ period, balance: Math.max(0, balance) });
+      }
+      
+      return schedule;
+    }
+
+    const frequencyLoanInput: LoanInput = {
+      ...loanInput,
+      frequency: selectedFrequency,
+    };
+    
+    const calculation = calculateLoanSchedule(frequencyLoanInput, extraPaymentPerPeriod, lumpSums);
+    return calculation.schedule.map(item => ({
       period: item.period,
-      balance: Math.round(item.balance),
+      balance: item.balance,
     }));
+  }, [selectedFrequency, loanInput, extraPaymentPerPeriod, lumpSums, hasExtraPayments]);
+
+  // Prepare data for chart - sample every Nth period to keep it manageable
+  const sampleRate = Math.max(1, Math.floor(baselineSchedule.length / 50));
+  
+  // Merge baseline and accelerated data
+  const chartData = baselineSchedule
+    .filter((_, index) => index % sampleRate === 0 || index === baselineSchedule.length - 1)
+    .map((item) => {
+      const baselineBalance = Math.round(item.balance);
+      
+      // Find corresponding accelerated balance if available
+      let acceleratedBalance = baselineBalance;
+      if (acceleratedSchedule) {
+        const accelItem = acceleratedSchedule.find(acc => acc.period === item.period);
+        if (accelItem) {
+          acceleratedBalance = Math.round(accelItem.balance);
+        } else {
+          // If accelerated schedule is shorter, use the last value
+          const lastAccel = acceleratedSchedule[acceleratedSchedule.length - 1];
+          if (lastAccel && item.period > lastAccel.period) {
+            acceleratedBalance = 0;
+          }
+        }
+      }
+      
+      return {
+        period: item.period,
+        baseline: baselineBalance,
+        accelerated: acceleratedBalance,
+      };
+    });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-AU', {
@@ -146,12 +251,22 @@ export function LoanChart({ loanInput }: LoanChartProps) {
             <Legend wrapperStyle={{ color: isDark ? '#f3f4f6' : '#111827' }} />
             <Line
               type="monotone"
-              dataKey="balance"
+              dataKey="baseline"
               stroke="#ef4444"
               strokeWidth={2}
               name="Minimum Repayment"
               dot={false}
             />
+            {hasExtraPayments && acceleratedSchedule && (
+              <Line
+                type="monotone"
+                dataKey="accelerated"
+                stroke="#10b981"
+                strokeWidth={2}
+                name="With Extra Payments"
+                dot={false}
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>

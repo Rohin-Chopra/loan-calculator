@@ -181,7 +181,11 @@ function App() {
               )}
 
             {/* Chart */}
-            <LoanChart loanInput={loanInput} />
+            <LoanChart 
+              loanInput={loanInput}
+              extraPaymentPerPeriod={extraPaymentPerPeriod}
+              lumpSums={lumpSums}
+            />
           </>
         )}
 
