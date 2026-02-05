@@ -12,6 +12,7 @@ import {
 import type { LoanInput, LumpSumPayment } from '../../types';
 import { useTheme } from '../../hooks/useTheme';
 import { calculateLoanSchedule } from '../../utils/loanCalculator';
+import { Card, CardContent } from '../ui/card';
 
 type FrequencyOption = 'fortnightly' | 'monthly' | 'yearly';
 
