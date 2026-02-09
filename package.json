@@ -9,7 +9,7 @@
     "lint": "turbo run lint",
     "preview": "turbo run preview",
     "clean": "turbo run clean && rm -rf node_modules",
-    "deploy": "turbo run deploy"
+    "deploy": "sh deploy.sh"
   },
   "devDependencies": {
     "turbo": "^2.3.0",
