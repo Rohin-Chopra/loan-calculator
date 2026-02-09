@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent } from '../components/ui/card';
+import { Spinner } from '../components/ui/spinner';
 import { saveLoan, updateSavedLoan, getSavedLoan } from '../utils/loanApi';
 import type { LoanInput, LumpSumPayment } from '../types';
 
@@ -30,6 +31,7 @@ export default function Calculator() {
     paymentsPerYear,
     showAcceleratedResults,
     currentLoanId,
+    isLoadingLoan,
     handleLoanSubmit,
     setExtraPaymentPerPeriod,
     setLumpSums,
@@ -56,10 +58,13 @@ export default function Calculator() {
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveName, setSaveName] = useState('');
+  const [isSavingLoan, setIsSavingLoan] = useState(false);
+  const [isLoadingLoanName, setIsLoadingLoanName] = useState(false);
 
   // Load loan name when opening save modal if editing existing loan
   useEffect(() => {
     if (showSaveModal && currentLoanId) {
+      setIsLoadingLoanName(true);
       getSavedLoan(currentLoanId)
         .then((savedLoan) => {
           if (savedLoan) {
@@ -68,14 +73,20 @@ export default function Calculator() {
         })
         .catch((error) => {
           console.error('Failed to load loan name:', error);
+        })
+        .finally(() => {
+          setIsLoadingLoanName(false);
         });
     } else if (!showSaveModal) {
       setSaveName('');
+      setIsLoadingLoanName(false);
     }
   }, [showSaveModal, currentLoanId]);
 
   const handleSaveLoan = async () => {
     if (!loanInput) return;
+    
+    setIsSavingLoan(true);
     
     if (currentLoanId) {
       // Update existing loan
@@ -112,6 +123,8 @@ export default function Calculator() {
       } catch (error) {
         console.error('Failed to update loan:', error);
         toast.error('Failed to update loan. Please try again.');
+      } finally {
+        setIsSavingLoan(false);
       }
     } else {
       // Create new loan
@@ -126,6 +139,8 @@ export default function Calculator() {
       } catch (error) {
         console.error('Failed to save loan:', error);
         toast.error('Failed to save loan. Please try again.');
+      } finally {
+        setIsSavingLoan(false);
       }
     }
   };
@@ -135,8 +150,22 @@ export default function Calculator() {
       {/* Loan Input Section */}
       <LoanInputForm onSubmit={handleLoanSubmit} initialValue={loanInput || undefined} />
 
+      {/* Loading State */}
+      {isLoadingLoan && (
+        <Card className="shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+          <CardContent className="p-16 text-center">
+            <div className="flex flex-col items-center justify-center">
+              <Spinner className="mb-4 h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Loading loan data...
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Results Section */}
-      {loanInput && baselineCalculation && (
+      {!isLoadingLoan && loanInput && baselineCalculation && (
         <>
           {/* Save Button */}
           <div className="mb-6 flex justify-end">
@@ -196,7 +225,7 @@ export default function Calculator() {
       )}
 
       {/* Empty State */}
-      {!loanInput && (
+      {!isLoadingLoan && !loanInput && (
         <Card className="shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
           <CardContent className="p-16 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
@@ -226,15 +255,22 @@ export default function Calculator() {
           <div className="space-y-6 py-4">
             <div className="space-y-3">
               <Label htmlFor="saveName" className="text-base font-semibold">Loan Name (optional)</Label>
-              <Input
-                id="saveName"
-                type="text"
-                value={saveName}
-                onChange={(e) => setSaveName(e.target.value)}
-                placeholder="e.g., Car Loan 2024"
-                autoFocus
-                className="h-12 text-lg"
-              />
+              {isLoadingLoanName ? (
+                <div className="flex items-center justify-center h-12">
+                  <Spinner className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+              ) : (
+                <Input
+                  id="saveName"
+                  type="text"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="e.g., Car Loan 2024"
+                  autoFocus
+                  className="h-12 text-lg"
+                  disabled={isSavingLoan}
+                />
+              )}
               <p className="text-xs text-muted-foreground font-medium">
                 Leave blank to auto-generate a name
               </p>
@@ -242,9 +278,17 @@ export default function Calculator() {
             <div className="flex gap-3">
               <Button
                 onClick={handleSaveLoan}
+                disabled={isSavingLoan || isLoadingLoanName}
                 className="flex-1 h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                {currentLoanId ? 'Update' : 'Save'}
+                {isSavingLoan ? (
+                  <>
+                    <Spinner className="mr-2 h-4 w-4" />
+                    {currentLoanId ? 'Updating...' : 'Saving...'}
+                  </>
+                ) : (
+                  currentLoanId ? 'Update' : 'Save'
+                )}
               </Button>
               <Button
                 variant="secondary"

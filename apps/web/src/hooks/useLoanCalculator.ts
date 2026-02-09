@@ -21,6 +21,7 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
   const [extraPaymentPerPeriod, setExtraPaymentPerPeriod] = useState<number>(0);
   const [lumpSums, setLumpSums] = useState<LumpSumPayment[]>([]);
   const [currentLoanId, setCurrentLoanId] = useState<string | null>(null);
+  const [isLoadingLoan, setIsLoadingLoan] = useState(false);
 
   // Load saved loan from URL parameter or sessionStorage (backward compatibility)
   useEffect(() => {
@@ -28,6 +29,7 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
 
     // Priority 1: Load from URL parameter
     if (loanIdFromUrl) {
+      setIsLoadingLoan(true);
       getSavedLoan(loanIdFromUrl)
         .then((savedLoan) => {
           if (!cancelled && savedLoan) {
@@ -39,6 +41,11 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
         })
         .catch((error) => {
           console.error('Failed to load saved loan:', error);
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setIsLoadingLoan(false);
+          }
         });
       return;
     }
@@ -67,6 +74,7 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
       setExtraPaymentPerPeriod(0);
       setLumpSums([]);
       setCurrentLoanId(null);
+      setIsLoadingLoan(false);
     }
 
     return () => {
@@ -123,6 +131,7 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
     paymentsPerYear,
     showAcceleratedResults,
     currentLoanId,
+    isLoadingLoan,
     handleLoanSubmit,
     setExtraPaymentPerPeriod,
     setLumpSums,

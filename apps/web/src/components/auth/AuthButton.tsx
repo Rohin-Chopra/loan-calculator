@@ -1,5 +1,6 @@
 import { signInWithRedirect } from 'aws-amplify/auth';
 import { Button } from '../ui/button';
+import { Spinner } from '../ui/spinner';
 import { useAuth } from '../../hooks/useAuth';
 
 export function AuthButton() {
@@ -16,6 +17,7 @@ export function AuthButton() {
   if (isLoading) {
     return (
       <Button variant="secondary" disabled className="bg-white/10 text-white border border-white/20">
+        <Spinner className="mr-2 h-4 w-4" />
         Loading...
       </Button>
     );

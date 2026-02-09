@@ -6,14 +6,17 @@ import { getSavedLoans, deleteSavedLoan } from '../utils/loanApi';
 import { MainLayout } from '../components/layout/MainLayout';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Spinner } from '../components/ui/spinner';
 
 export default function SavedLoans() {
   const navigate = useNavigate();
   const [savedLoans, setSavedLoans] = useState<SavedLoan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
+    setIsLoading(true);
     getSavedLoans()
       .then((loans) => {
         setSavedLoans(loans);
@@ -21,6 +24,9 @@ export default function SavedLoans() {
       .catch((error) => {
         console.error('Failed to load saved loans:', error);
         toast.error('Failed to load saved loans');
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
@@ -87,22 +93,35 @@ export default function SavedLoans() {
   return (
     <MainLayout headerTitle="💰 Kill My Loan" headerSubtitle="Your saved loan calculations">
       <div className="max-w-4xl mx-auto">
-        {savedLoans.length > 0 && (
-          <div className="mb-6 flex justify-end">
-            <Button
-              asChild
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6"
-            >
-              <Link to="/">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                New Loan
-              </Link>
-            </Button>
-          </div>
-        )}
-        {savedLoans.length === 0 ? (
+        {isLoading ? (
+          <Card className="shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+            <CardContent className="p-16 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <Spinner className="mb-4 h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  Loading your saved loans...
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {savedLoans.length > 0 && (
+              <div className="mb-6 flex justify-end">
+                <Button
+                  asChild
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6"
+                >
+                  <Link to="/">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    New Loan
+                  </Link>
+                </Button>
+              </div>
+            )}
+            {savedLoans.length === 0 ? (
           <Card className="shadow-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
             <CardContent className="p-16 text-center">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
@@ -236,6 +255,8 @@ export default function SavedLoans() {
               </Card>
             ))}
           </div>
+            )}
+          </>
         )}
       </div>
     </MainLayout>
