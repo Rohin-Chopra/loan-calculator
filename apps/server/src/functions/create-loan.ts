@@ -5,12 +5,14 @@ import httpCors from '@middy/http-cors';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient, TABLE_NAME } from '../utils/dynamodb';
 import { generateDefaultName } from '../utils/helpers';
+import { requireAuth } from '../utils/auth';
 import type { CreateLoanRequest, SavedLoan } from '../types';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 async function createLoanHandler(
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
+  const userId = requireAuth(event);
   const body = event.body as unknown as CreateLoanRequest;
   const { loanInput, extraPaymentPerPeriod = 0, lumpSums = [], name } = body;
 
@@ -27,6 +29,7 @@ async function createLoanHandler(
 
   const savedLoan: SavedLoan = {
     id,
+    userId,
     name: loanName,
     loanInput,
     extraPaymentPerPeriod,

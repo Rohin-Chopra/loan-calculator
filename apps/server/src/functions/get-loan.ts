@@ -3,11 +3,13 @@ import httpErrorHandler from '@middy/http-error-handler';
 import httpCors from '@middy/http-cors';
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient, TABLE_NAME } from '../utils/dynamodb';
+import { requireAuth } from '../utils/auth';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 async function getLoanHandler(
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
+  const userId = requireAuth(event);
   const id = event.pathParameters?.id;
 
   if (!id) {
@@ -28,6 +30,14 @@ async function getLoanHandler(
     return {
       statusCode: 404,
       body: JSON.stringify({ error: 'Loan not found' }),
+    };
+  }
+
+  // Verify ownership
+  if (result.Item.userId !== userId) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ error: 'Forbidden: You do not have access to this loan' }),
     };
   }
 

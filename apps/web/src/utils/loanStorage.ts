@@ -14,6 +14,7 @@ export function saveLoan(
   
   const savedLoan: SavedLoan = {
     id,
+    userId: 'local-storage', // Placeholder for local storage (not used with API)
     name: name || generateDefaultName(loanInput),
     loanInput,
     extraPaymentPerPeriod,

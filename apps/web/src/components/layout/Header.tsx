@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
+import { AuthButton } from '../auth/AuthButton';
 
 export function Header({ title, subtitle }: { title?: string; subtitle?: string }) {
   const { theme, toggleTheme } = useTheme();
@@ -25,7 +26,8 @@ export function Header({ title, subtitle }: { title?: string; subtitle?: string 
               </p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <AuthButton />
             {isSavedLoansPage ? (
               <Link
                 to="/"

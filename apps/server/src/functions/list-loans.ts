@@ -1,16 +1,24 @@
 import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import httpCors from '@middy/http-cors';
-import { ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient, TABLE_NAME } from '../utils/dynamodb';
+import { requireAuth } from '../utils/auth';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 async function listLoansHandler(
-  _event: APIGatewayProxyEventV2
+  event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
+  const userId = requireAuth(event);
+
   const result = await docClient.send(
-    new ScanCommand({
+    new QueryCommand({
       TableName: TABLE_NAME,
+      IndexName: 'userId-index',
+      KeyConditionExpression: 'userId = :userId',
+      ExpressionAttributeValues: {
+        ':userId': userId,
+      },
     })
   );
 

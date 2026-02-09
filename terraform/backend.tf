@@ -13,6 +13,17 @@ resource "aws_dynamodb_table" "loans" {
     type = "S"
   }
 
+  attribute {
+    name = "userId"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "userId-index"
+    hash_key        = "userId"
+    projection_type = "ALL"
+  }
+
   tags = {
     Name = "${var.environment}-loans-table"
   }

@@ -38,6 +38,7 @@ export interface LoanResult {
 
 export interface SavedLoan {
   id: string;
+  userId: string;
   name: string;
   loanInput: LoanInput;
   extraPaymentPerPeriod: number;

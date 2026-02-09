@@ -16,6 +16,19 @@ resource "aws_apigatewayv2_api" "loan_api" {
   }
 }
 
+# Cognito Authorizer
+resource "aws_apigatewayv2_authorizer" "cognito" {
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+  name             = "cognito-authorizer"
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.web.id]
+    issuer   = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.main.id}"
+  }
+}
+
 # API Gateway integrations
 resource "aws_apigatewayv2_integration" "create_loan" {
   api_id           = aws_apigatewayv2_api.loan_api.id
@@ -54,33 +67,43 @@ resource "aws_apigatewayv2_integration" "delete_loan" {
 
 # API Gateway routes
 resource "aws_apigatewayv2_route" "create_loan" {
-  api_id    = aws_apigatewayv2_api.loan_api.id
-  route_key = "POST /loans"
-  target    = "integrations/${aws_apigatewayv2_integration.create_loan.id}"
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  route_key        = "POST /loans"
+  target           = "integrations/${aws_apigatewayv2_integration.create_loan.id}"
+  authorizer_id   = aws_apigatewayv2_authorizer.cognito.id
+  authorization_type = "JWT"
 }
 
 resource "aws_apigatewayv2_route" "get_loan" {
-  api_id    = aws_apigatewayv2_api.loan_api.id
-  route_key = "GET /loans/{id}"
-  target    = "integrations/${aws_apigatewayv2_integration.get_loan.id}"
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  route_key        = "GET /loans/{id}"
+  target           = "integrations/${aws_apigatewayv2_integration.get_loan.id}"
+  authorizer_id   = aws_apigatewayv2_authorizer.cognito.id
+  authorization_type = "JWT"
 }
 
 resource "aws_apigatewayv2_route" "list_loans" {
-  api_id    = aws_apigatewayv2_api.loan_api.id
-  route_key = "GET /loans"
-  target    = "integrations/${aws_apigatewayv2_integration.list_loans.id}"
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  route_key        = "GET /loans"
+  target           = "integrations/${aws_apigatewayv2_integration.list_loans.id}"
+  authorizer_id   = aws_apigatewayv2_authorizer.cognito.id
+  authorization_type = "JWT"
 }
 
 resource "aws_apigatewayv2_route" "update_loan" {
-  api_id    = aws_apigatewayv2_api.loan_api.id
-  route_key = "PUT /loans/{id}"
-  target    = "integrations/${aws_apigatewayv2_integration.update_loan.id}"
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  route_key        = "PUT /loans/{id}"
+  target           = "integrations/${aws_apigatewayv2_integration.update_loan.id}"
+  authorizer_id   = aws_apigatewayv2_authorizer.cognito.id
+  authorization_type = "JWT"
 }
 
 resource "aws_apigatewayv2_route" "delete_loan" {
-  api_id    = aws_apigatewayv2_api.loan_api.id
-  route_key = "DELETE /loans/{id}"
-  target    = "integrations/${aws_apigatewayv2_integration.delete_loan.id}"
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  route_key        = "DELETE /loans/{id}"
+  target           = "integrations/${aws_apigatewayv2_integration.delete_loan.id}"
+  authorizer_id   = aws_apigatewayv2_authorizer.cognito.id
+  authorization_type = "JWT"
 }
 
 # OPTIONS route for CORS preflight

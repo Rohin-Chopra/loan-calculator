@@ -4,12 +4,14 @@ import httpErrorHandler from '@middy/http-error-handler';
 import httpCors from '@middy/http-cors';
 import { GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient, TABLE_NAME } from '../utils/dynamodb';
+import { requireAuth } from '../utils/auth';
 import type { UpdateLoanRequest } from '../types';
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 async function updateLoanHandler(
   event: APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResultV2> {
+  const userId = requireAuth(event);
   const id = event.pathParameters?.id;
   const body = event.body as unknown as UpdateLoanRequest;
   const { name, loanInput, extraPaymentPerPeriod, lumpSums } = body;
@@ -33,6 +35,14 @@ async function updateLoanHandler(
     return {
       statusCode: 404,
       body: JSON.stringify({ error: 'Loan not found' }),
+    };
+  }
+
+  // Verify ownership
+  if (getResult.Item.userId !== userId) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ error: 'Forbidden: You do not have access to this loan' }),
     };
   }
 
