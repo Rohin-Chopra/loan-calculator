@@ -520,7 +520,7 @@ resource "aws_apigatewayv2_api" "loan_api" {
   description   = "API for loan calculator backend"
 
   cors_configuration {
-    allow_origins = ["https://${var.domain_name}", "http://localhost:5173"]
+    allow_origins = ["https://${var.domain_name}", "https://${var.api_domain_name}", "http://localhost:5173"]
     allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     allow_headers = ["Content-Type", "Authorization"]
     max_age       = 300
@@ -651,4 +651,99 @@ resource "aws_lambda_permission" "delete_loan" {
   function_name = aws_lambda_function.delete_loan.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.loan_api.execution_arn}/*/*"
+}
+
+# ============================================================================
+# API Gateway Custom Domain
+# ============================================================================
+
+# ACM Certificate for API Gateway (must be in the same region as API Gateway)
+resource "aws_acm_certificate" "api" {
+  domain_name       = var.api_domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "${var.api_domain_name}-certificate"
+  }
+}
+
+# Route53 records for API certificate validation
+resource "aws_route53_record" "api_cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.api.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.main.zone_id
+}
+
+# ACM Certificate Validation for API
+resource "aws_acm_certificate_validation" "api" {
+  certificate_arn = aws_acm_certificate.api.arn
+
+  validation_record_fqdns = [
+    for record in aws_route53_record.api_cert_validation : record.fqdn
+  ]
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+# API Gateway Domain Name
+resource "aws_apigatewayv2_domain_name" "api" {
+  domain_name = var.api_domain_name
+
+  domain_name_configuration {
+    certificate_arn = aws_acm_certificate_validation.api.certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+
+  depends_on = [aws_acm_certificate_validation.api]
+}
+
+# API Gateway Domain Name API Mapping
+resource "aws_apigatewayv2_api_mapping" "api" {
+  api_id      = aws_apigatewayv2_api.loan_api.id
+  domain_name = aws_apigatewayv2_domain_name.api.id
+  stage       = aws_apigatewayv2_stage.loan_api.id
+}
+
+# Route53 A record for API domain
+resource "aws_route53_record" "api" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.api_domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].target_domain_name
+    zone_id                = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route53 AAAA record for API domain (IPv6)
+resource "aws_route53_record" "api_ipv6" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.api_domain_name
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].target_domain_name
+    zone_id                = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].hosted_zone_id
+    evaluate_target_health = false
+  }
 }

@@ -21,3 +21,9 @@ variable "environment" {
   type        = string
   default     = "production"
 }
+
+variable "api_domain_name" {
+  description = "Domain name for the API Gateway"
+  type        = string
+  default     = "api.loans.rohinchopra.com"
+}

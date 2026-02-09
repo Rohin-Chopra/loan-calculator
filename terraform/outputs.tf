@@ -39,8 +39,13 @@ output "route53_zone_id" {
 }
 
 output "api_gateway_url" {
-  description = "API Gateway endpoint URL"
+  description = "API Gateway endpoint URL (default)"
   value       = aws_apigatewayv2_api.loan_api.api_endpoint
+}
+
+output "api_gateway_custom_domain" {
+  description = "API Gateway custom domain URL"
+  value       = "https://${var.api_domain_name}"
 }
 
 output "dynamodb_table_name" {
