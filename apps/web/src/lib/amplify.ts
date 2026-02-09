@@ -10,6 +10,24 @@ const getRedirectUrls = () => {
   ];
 };
 
+// Construct the full Cognito domain if only the short domain is provided
+const getCognitoDomain = () => {
+  const domain = import.meta.env.VITE_COGNITO_DOMAIN || '';
+  const region = import.meta.env.VITE_AWS_REGION || 'ap-southeast-4';
+  
+  // If domain already contains .auth., it's already the full domain
+  if (domain.includes('.auth.')) {
+    return domain;
+  }
+  
+  // Otherwise, construct the full domain
+  if (domain) {
+    return `${domain}.auth.${region}.amazoncognito.com`;
+  }
+  
+  return '';
+};
+
 const cognitoConfig = {
   Auth: {
     Cognito: {
@@ -17,7 +35,7 @@ const cognitoConfig = {
       userPoolClientId: import.meta.env.VITE_COGNITO_USER_POOL_CLIENT_ID || '',
       loginWith: {
         oauth: {
-          domain: import.meta.env.VITE_COGNITO_DOMAIN || '',
+          domain: getCognitoDomain(),
           scopes: ['openid', 'email', 'profile'],
           redirectSignIn: getRedirectUrls(),
           redirectSignOut: getRedirectUrls(),

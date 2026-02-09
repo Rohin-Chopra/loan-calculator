@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/useAuth';
 
 export function AuthButton() {
-  const { isAuthenticated, user, signOut, isLoading } = useAuth();
+  const { isAuthenticated, user, userName, signOut, isLoading } = useAuth();
 
   const handleSignIn = async () => {
     try {
@@ -22,8 +22,9 @@ export function AuthButton() {
   }
 
   if (isAuthenticated) {
-    // Extract email or username from user
-    const displayName = user?.signInDetails?.loginId || 
+    // Use the decoded name from JWT token, fallback to email or username
+    const displayName = userName || 
+                       user?.signInDetails?.loginId || 
                        user?.username || 
                        'User';
     

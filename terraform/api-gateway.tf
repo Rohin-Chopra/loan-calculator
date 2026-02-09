@@ -9,10 +9,11 @@ resource "aws_apigatewayv2_api" "loan_api" {
   description   = "API for loan calculator backend"
 
   cors_configuration {
-    allow_origins = ["https://${var.domain_name}", "https://${var.api_domain_name}", "http://localhost:5173"]
-    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    allow_headers = ["Content-Type", "Authorization"]
-    max_age       = 300
+    allow_origins     = ["https://${var.domain_name}", "https://${var.api_domain_name}", "http://localhost:5173"]
+    allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_headers     = ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token"]
+    allow_credentials = true
+    max_age          = 300
   }
 }
 
@@ -106,12 +107,8 @@ resource "aws_apigatewayv2_route" "delete_loan" {
   authorization_type = "JWT"
 }
 
-# OPTIONS route for CORS preflight
-resource "aws_apigatewayv2_route" "options" {
-  api_id    = aws_apigatewayv2_api.loan_api.id
-  route_key = "OPTIONS /{proxy+}"
-  target    = "integrations/${aws_apigatewayv2_integration.create_loan.id}"
-}
+# Note: OPTIONS requests are automatically handled by API Gateway v2
+# when CORS is configured at the API level (see cors_configuration above)
 
 # API Gateway stage
 resource "aws_apigatewayv2_stage" "loan_api" {
