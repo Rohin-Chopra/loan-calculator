@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import type { SavedLoan } from '../types';
-import { getSavedLoans, deleteSavedLoan } from '../utils/loanStorage';
+import { getSavedLoans, deleteSavedLoan } from '../utils/loanApi';
 import { MainLayout } from '../components/layout/MainLayout';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -13,7 +14,14 @@ export default function SavedLoans() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    setSavedLoans(getSavedLoans());
+    getSavedLoans()
+      .then((loans) => {
+        setSavedLoans(loans);
+      })
+      .catch((error) => {
+        console.error('Failed to load saved loans:', error);
+        toast.error('Failed to load saved loans');
+      });
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -22,10 +30,21 @@ export default function SavedLoans() {
     }
 
     setDeletingId(id);
-    if (deleteSavedLoan(id)) {
-      setSavedLoans(getSavedLoans());
+    try {
+      const success = await deleteSavedLoan(id);
+      if (success) {
+        const loans = await getSavedLoans();
+        setSavedLoans(loans);
+        toast.success('Loan deleted successfully');
+      } else {
+        toast.error('Failed to delete loan');
+      }
+    } catch (error) {
+      console.error('Failed to delete loan:', error);
+      toast.error('Failed to delete loan');
+    } finally {
+      setDeletingId(null);
     }
-    setDeletingId(null);
   };
 
   const handleLoad = (loan: SavedLoan) => {

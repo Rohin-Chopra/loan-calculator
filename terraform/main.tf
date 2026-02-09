@@ -6,6 +6,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.4"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
   }
 
   # Uncomment and configure if you want to use remote state
@@ -319,4 +327,328 @@ resource "aws_route53_record" "website_ipv6" {
     zone_id                = aws_cloudfront_distribution.website.hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+# ============================================================================
+# Backend Infrastructure - DynamoDB, Lambda, API Gateway
+# ============================================================================
+
+# DynamoDB table for storing loans
+resource "aws_dynamodb_table" "loans" {
+  name         = "${var.environment}-loans"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  tags = {
+    Name = "${var.environment}-loans-table"
+  }
+}
+
+# IAM role for Lambda functions
+resource "aws_iam_role" "lambda_role" {
+  name = "${var.environment}-loan-api-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for Lambda to access DynamoDB
+resource "aws_iam_role_policy" "lambda_dynamodb_policy" {
+  name = "${var.environment}-loan-api-lambda-dynamodb-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = [
+          aws_dynamodb_table.loans.arn,
+          "${aws_dynamodb_table.loans.arn}/index/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+# Build Lambda packages from server workspace
+resource "null_resource" "lambda_build" {
+  triggers = {
+    server_code = filemd5("${path.module}/../apps/server/package.json")
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      cd ${path.module}/../apps/server
+      pnpm install
+      pnpm package
+    EOT
+  }
+}
+
+# Lambda function for creating loans
+resource "aws_lambda_function" "create_loan" {
+  filename         = "${path.module}/../apps/server/packages/create-loan.zip"
+  function_name    = "${var.environment}-create-loan"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs20.x"
+  timeout         = 10
+  source_code_hash = filebase64sha256("${path.module}/../apps/server/packages/create-loan.zip")
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.loans.name
+    }
+  }
+
+  depends_on = [null_resource.lambda_build]
+}
+
+# Lambda function for getting a loan by ID
+resource "aws_lambda_function" "get_loan" {
+  filename         = "${path.module}/../apps/server/packages/get-loan.zip"
+  function_name    = "${var.environment}-get-loan"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs20.x"
+  timeout         = 10
+  source_code_hash = filebase64sha256("${path.module}/../apps/server/packages/get-loan.zip")
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.loans.name
+    }
+  }
+
+  depends_on = [null_resource.lambda_build]
+}
+
+# Lambda function for listing loans
+resource "aws_lambda_function" "list_loans" {
+  filename         = "${path.module}/../apps/server/packages/list-loans.zip"
+  function_name    = "${var.environment}-list-loans"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs20.x"
+  timeout         = 10
+  source_code_hash = filebase64sha256("${path.module}/../apps/server/packages/list-loans.zip")
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.loans.name
+    }
+  }
+
+  depends_on = [null_resource.lambda_build]
+}
+
+# Lambda function for updating a loan
+resource "aws_lambda_function" "update_loan" {
+  filename         = "${path.module}/../apps/server/packages/update-loan.zip"
+  function_name    = "${var.environment}-update-loan"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs20.x"
+  timeout         = 10
+  source_code_hash = filebase64sha256("${path.module}/../apps/server/packages/update-loan.zip")
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.loans.name
+    }
+  }
+
+  depends_on = [null_resource.lambda_build]
+}
+
+# Lambda function for deleting a loan
+resource "aws_lambda_function" "delete_loan" {
+  filename         = "${path.module}/../apps/server/packages/delete-loan.zip"
+  function_name    = "${var.environment}-delete-loan"
+  role            = aws_iam_role.lambda_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs20.x"
+  timeout         = 10
+  source_code_hash = filebase64sha256("${path.module}/../apps/server/packages/delete-loan.zip")
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.loans.name
+    }
+  }
+
+  depends_on = [null_resource.lambda_build]
+}
+
+# API Gateway REST API
+resource "aws_apigatewayv2_api" "loan_api" {
+  name          = "${var.environment}-loan-api"
+  protocol_type = "HTTP"
+  description   = "API for loan calculator backend"
+
+  cors_configuration {
+    allow_origins = ["https://${var.domain_name}", "http://localhost:5173"]
+    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_headers = ["Content-Type", "Authorization"]
+    max_age       = 300
+  }
+}
+
+# API Gateway integration for create loan
+resource "aws_apigatewayv2_integration" "create_loan" {
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.create_loan.invoke_arn
+  integration_method = "POST"
+}
+
+# API Gateway integration for get loan
+resource "aws_apigatewayv2_integration" "get_loan" {
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.get_loan.invoke_arn
+  integration_method = "POST"
+}
+
+# API Gateway integration for list loans
+resource "aws_apigatewayv2_integration" "list_loans" {
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.list_loans.invoke_arn
+  integration_method = "POST"
+}
+
+# API Gateway integration for update loan
+resource "aws_apigatewayv2_integration" "update_loan" {
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.update_loan.invoke_arn
+  integration_method = "POST"
+}
+
+# API Gateway integration for delete loan
+resource "aws_apigatewayv2_integration" "delete_loan" {
+  api_id           = aws_apigatewayv2_api.loan_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.delete_loan.invoke_arn
+  integration_method = "POST"
+}
+
+# API Gateway routes
+resource "aws_apigatewayv2_route" "create_loan" {
+  api_id    = aws_apigatewayv2_api.loan_api.id
+  route_key = "POST /loans"
+  target    = "integrations/${aws_apigatewayv2_integration.create_loan.id}"
+}
+
+resource "aws_apigatewayv2_route" "get_loan" {
+  api_id    = aws_apigatewayv2_api.loan_api.id
+  route_key = "GET /loans/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.get_loan.id}"
+}
+
+resource "aws_apigatewayv2_route" "list_loans" {
+  api_id    = aws_apigatewayv2_api.loan_api.id
+  route_key = "GET /loans"
+  target    = "integrations/${aws_apigatewayv2_integration.list_loans.id}"
+}
+
+resource "aws_apigatewayv2_route" "update_loan" {
+  api_id    = aws_apigatewayv2_api.loan_api.id
+  route_key = "PUT /loans/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.update_loan.id}"
+}
+
+resource "aws_apigatewayv2_route" "delete_loan" {
+  api_id    = aws_apigatewayv2_api.loan_api.id
+  route_key = "DELETE /loans/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.delete_loan.id}"
+}
+
+# OPTIONS route for CORS preflight
+resource "aws_apigatewayv2_route" "options" {
+  api_id    = aws_apigatewayv2_api.loan_api.id
+  route_key = "OPTIONS /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.create_loan.id}"
+}
+
+# API Gateway stage
+resource "aws_apigatewayv2_stage" "loan_api" {
+  api_id      = aws_apigatewayv2_api.loan_api.id
+  name        = "$default"
+  auto_deploy = true
+}
+
+# Lambda permissions for API Gateway
+resource "aws_lambda_permission" "create_loan" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.create_loan.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.loan_api.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "get_loan" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_loan.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.loan_api.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "list_loans" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.list_loans.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.loan_api.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "update_loan" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.update_loan.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.loan_api.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "delete_loan" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.delete_loan.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.loan_api.execution_arn}/*/*"
 }

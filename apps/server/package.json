@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist packages",
+    "package": "pnpm build && pnpm package:functions",
+    "package:functions": "node scripts/package.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0",
+    "@middy/core": "^5.5.1",
+    "@middy/http-cors": "^5.5.1",
+    "@middy/http-error-handler": "^5.5.1",
+    "@middy/http-json-body-parser": "^5.5.1",
+    "@middy/validator": "^5.5.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^24.10.1",
+    "typescript": "~5.9.3"
+  }
+}

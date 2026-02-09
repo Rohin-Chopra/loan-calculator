@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent } from '../components/ui/card';
-import { saveLoan, updateSavedLoan, getSavedLoan } from '../utils/loanStorage';
+import { saveLoan, updateSavedLoan, getSavedLoan } from '../utils/loanApi';
 import type { LoanInput, LumpSumPayment } from '../types';
 
 export default function Calculator() {
@@ -40,11 +40,17 @@ export default function Calculator() {
   useEffect(() => {
     if (id && !currentLoanId && !loanInput) {
       // Check if loan exists
-      const savedLoan = getSavedLoan(id);
-      if (!savedLoan) {
-        // Loan doesn't exist, redirect to home
-        navigate('/', { replace: true });
-      }
+      getSavedLoan(id)
+        .then((savedLoan) => {
+          if (!savedLoan) {
+            // Loan doesn't exist, redirect to home
+            navigate('/', { replace: true });
+          }
+        })
+        .catch(() => {
+          // Error loading loan, redirect to home
+          navigate('/', { replace: true });
+        });
     }
   }, [id, currentLoanId, loanInput, navigate]);
 
@@ -54,16 +60,21 @@ export default function Calculator() {
   // Load loan name when opening save modal if editing existing loan
   useEffect(() => {
     if (showSaveModal && currentLoanId) {
-      const savedLoan = getSavedLoan(currentLoanId);
-      if (savedLoan) {
-        setSaveName(savedLoan.name);
-      }
+      getSavedLoan(currentLoanId)
+        .then((savedLoan) => {
+          if (savedLoan) {
+            setSaveName(savedLoan.name);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to load loan name:', error);
+        });
     } else if (!showSaveModal) {
       setSaveName('');
     }
   }, [showSaveModal, currentLoanId]);
 
-  const handleSaveLoan = () => {
+  const handleSaveLoan = async () => {
     if (!loanInput) return;
     
     if (currentLoanId) {
@@ -84,28 +95,38 @@ export default function Calculator() {
         updateData.name = saveName.trim();
       }
       
-      const updated = updateSavedLoan(currentLoanId, updateData);
-      
-      if (updated) {
-        // Update URL to reflect the loan ID if not already there
-        if (id !== currentLoanId) {
-          navigate(`/loan/${currentLoanId}`, { replace: true });
+      try {
+        const updated = await updateSavedLoan(currentLoanId, updateData);
+        
+        if (updated) {
+          // Update URL to reflect the loan ID if not already there
+          if (id !== currentLoanId) {
+            navigate(`/loan/${currentLoanId}`, { replace: true });
+          }
+          setShowSaveModal(false);
+          setSaveName('');
+          toast.success('Loan updated successfully!');
+        } else {
+          toast.error('Failed to update loan. Please try again.');
         }
-        setShowSaveModal(false);
-        setSaveName('');
-        toast.success('Loan updated successfully!');
-      } else {
+      } catch (error) {
+        console.error('Failed to update loan:', error);
         toast.error('Failed to update loan. Please try again.');
       }
     } else {
       // Create new loan
-      const newLoan = saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
-      setCurrentLoanId(newLoan.id); // Set the current loan ID so future updates work
-      // Navigate to the loan's URL
-      navigate(`/loan/${newLoan.id}`, { replace: true });
-      setShowSaveModal(false);
-      setSaveName('');
-      toast.success('Loan saved successfully!');
+      try {
+        const newLoan = await saveLoan(loanInput, extraPaymentPerPeriod, lumpSums, saveName || undefined);
+        setCurrentLoanId(newLoan.id); // Set the current loan ID so future updates work
+        // Navigate to the loan's URL
+        navigate(`/loan/${newLoan.id}`, { replace: true });
+        setShowSaveModal(false);
+        setSaveName('');
+        toast.success('Loan saved successfully!');
+      } catch (error) {
+        console.error('Failed to save loan:', error);
+        toast.error('Failed to save loan. Please try again.');
+      }
     }
   };
 

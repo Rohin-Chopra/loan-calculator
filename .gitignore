@@ -37,3 +37,7 @@ build
 
 # Turbo
 .turbo
+
+# Server packages
+apps/server/packages
+apps/server/dist

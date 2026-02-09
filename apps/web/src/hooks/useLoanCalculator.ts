@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { LoanInput, LumpSumPayment, SavedLoan } from '../types';
 import { calculateLoanSchedule } from '../utils/loanCalculator';
-import { getSavedLoan } from '../utils/loanStorage';
+import { getSavedLoan } from '../utils/loanApi';
 
 function getPaymentsPerYear(frequency: string): number {
   switch (frequency) {
@@ -22,18 +22,25 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
   const [lumpSums, setLumpSums] = useState<LumpSumPayment[]>([]);
   const [currentLoanId, setCurrentLoanId] = useState<string | null>(null);
 
-  // Load saved loan from URL parameter, sessionStorage (backward compatibility), or localStorage
+  // Load saved loan from URL parameter or sessionStorage (backward compatibility)
   useEffect(() => {
+    let cancelled = false;
+
     // Priority 1: Load from URL parameter
     if (loanIdFromUrl) {
-      const savedLoan = getSavedLoan(loanIdFromUrl);
-      if (savedLoan) {
-        setLoanInput(savedLoan.loanInput);
-        setExtraPaymentPerPeriod(savedLoan.extraPaymentPerPeriod);
-        setLumpSums(savedLoan.lumpSums);
-        setCurrentLoanId(savedLoan.id);
-        return; // Don't check sessionStorage if URL param is present
-      }
+      getSavedLoan(loanIdFromUrl)
+        .then((savedLoan) => {
+          if (!cancelled && savedLoan) {
+            setLoanInput(savedLoan.loanInput);
+            setExtraPaymentPerPeriod(savedLoan.extraPaymentPerPeriod);
+            setLumpSums(savedLoan.lumpSums);
+            setCurrentLoanId(savedLoan.id);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to load saved loan:', error);
+        });
+      return;
     }
 
     // Priority 2: Load from sessionStorage (backward compatibility)
@@ -41,12 +48,14 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
     if (loadLoanData) {
       try {
         const savedLoan: SavedLoan = JSON.parse(loadLoanData);
-        setLoanInput(savedLoan.loanInput);
-        setExtraPaymentPerPeriod(savedLoan.extraPaymentPerPeriod);
-        setLumpSums(savedLoan.lumpSums);
-        setCurrentLoanId(savedLoan.id);
+        if (!cancelled) {
+          setLoanInput(savedLoan.loanInput);
+          setExtraPaymentPerPeriod(savedLoan.extraPaymentPerPeriod);
+          setLumpSums(savedLoan.lumpSums);
+          setCurrentLoanId(savedLoan.id);
+        }
         sessionStorage.removeItem('loadLoan');
-        return; // Don't clear state if we loaded from sessionStorage
+        return;
       } catch (e) {
         console.error('Failed to load saved loan:', e);
       }
@@ -59,6 +68,10 @@ export function useLoanCalculator(loanIdFromUrl?: string | null) {
       setLumpSums([]);
       setCurrentLoanId(null);
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [loanIdFromUrl]);
 
   // Calculate baseline (minimum repayment only)

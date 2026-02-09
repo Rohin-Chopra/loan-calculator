@@ -8,13 +8,23 @@ This directory contains Terraform configuration to deploy the loan calculator we
 - **CloudFront**: CDN distribution with SSL/TLS termination
 - **Route53**: DNS management for `loans.rohinchopra.com`
 - **ACM**: SSL certificate for HTTPS (in us-east-1 for CloudFront)
+- **DynamoDB**: Database for storing loan calculations
+- **Lambda Functions**: TypeScript serverless functions with Middy middleware for CRUD operations
+- **API Gateway**: HTTP API for Lambda function endpoints
+
+## Lambda Functions
+
+Lambda functions are located in `apps/server` workspace and are written in TypeScript with Middy middleware. Terraform automatically builds and packages them during deployment.
+
+See `apps/server/README.md` for Lambda function development details.
 
 ## Prerequisites
 
 1. AWS CLI configured with appropriate credentials
 2. Terraform >= 1.0 installed
-3. Route53 hosted zone for `rohinchopra.com` already exists
-4. Domain `loans.rohinchopra.com` DNS validation access
+3. Node.js and pnpm installed (for Lambda function build)
+4. Route53 hosted zone for `rohinchopra.com` already exists
+5. Domain `loans.rohinchopra.com` DNS validation access
 
 ## Setup
 
@@ -24,19 +34,41 @@ This directory contains Terraform configuration to deploy the loan calculator we
    terraform init
    ```
 
-2. **Review the plan**:
+2. **Build Lambda functions** (required before first apply):
+   ```bash
+   cd ../apps/server
+   pnpm install
+   pnpm package
+   cd ../../terraform
+   ```
+   
+   This will compile TypeScript and package Lambda functions with dependencies.
+
+3. **Review the plan**:
    ```bash
    terraform plan
    ```
 
-3. **Apply the configuration**:
+4. **Apply the configuration**:
    ```bash
    terraform apply
    ```
 
    Note: The first apply will create the ACM certificate and Route53 validation records. You'll need to wait for certificate validation (usually a few minutes) before the CloudFront distribution can be fully created. If validation fails, run `terraform apply` again.
 
-4. **Deploy your website**:
+5. **Get the API Gateway URL**:
+   After applying, get the API Gateway URL:
+   ```bash
+   terraform output api_gateway_url
+   ```
+   
+   Copy this URL and add it to your frontend `.env` file:
+   ```bash
+   cd ../apps/web
+   echo "VITE_API_BASE_URL=$(cd ../../terraform && terraform output -raw api_gateway_url)" > .env
+   ```
+
+6. **Deploy your website**:
    After infrastructure is created, upload your built website files to the S3 bucket:
    ```bash
    # From the project root
@@ -70,6 +102,8 @@ Key outputs:
 - `cloudfront_distribution_id`: CloudFront distribution ID
 - `website_url`: Full URL of the website
 - `cloudfront_domain_name`: CloudFront domain name
+- `api_gateway_url`: API Gateway endpoint URL (for frontend configuration)
+- `dynamodb_table_name`: DynamoDB table name
 
 ## Deployment Script
 
